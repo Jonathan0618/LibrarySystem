@@ -1,0 +1,21 @@
+@page
+@model LibrarySystem.Pages.ErrorModel
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Error</title>
+</head>
+<body>
+    <main>
+        <h1>An error occurred.</h1>
+        <p>Please try again. If the problem continues, contact an administrator.</p>
+        @if (Model.ShowRequestId)
+        {
+            <p>Request ID: <code>@Model.RequestId</code></p>
+        }
+    </main>
+</body>
+</html>
