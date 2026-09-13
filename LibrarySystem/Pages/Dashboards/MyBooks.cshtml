@@ -1,0 +1,67 @@
+@page
+@model LibrarySystem.Pages.Dashboards.MyBooksModel
+@{
+    Layout = null;
+    ViewData["ActiveStudentNavigation"] = "Books";
+    ViewData["Title"] = "My Books";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>@ViewData["Title"] | School Library</title>
+    <link rel="stylesheet" href="~/css/my-books.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/student-shell.css" asp-append-version="true" />
+</head>
+<body>
+    <partial name="_StudentHeader" />
+    <main class="page">
+        <div class="heading">
+            <div>
+<h1>My books</h1>
+<p class="subtitle">Current loans, due dates, and renewal history.</p>
+</div>
+            <a class="back" asp-page="./StudentDashboard">Back to dashboard</a>
+        </div>
+@if (TempData["StatusMessage"] is string status){
+<div class="notice" role="status">@status</div>
+}
+@if (TempData["ErrorMessage"] is string error){
+<div class="notice error" role="alert">@error</div>
+}
+@if (Model.Dashboard.ActiveLoans.Count == 0){
+<div class="empty">You have no books checked out.</div>
+}
+        else
+        {
+            <section class="loan-list" aria-label="Current loans">
+                @foreach (var loan in Model.Dashboard.ActiveLoans)
+                {
+                    var overdue = loan.DueAtUtc < DateTime.UtcNow;
+                    <article class="loan @(overdue ? "overdue" : "")">
+                        <div>
+<span class="title">@loan.BookTitle</span>
+<span class="meta">Barcode @loan.Barcode</span>
+</div>
+                        <div>
+<span class="label">Due date</span>
+<span class="value">@loan.DueAtUtc.ToLocalTime().ToString("D")</span>
+<span class="status @(overdue ? "overdue" : "")">@(overdue ? "Overdue" : "On loan")</span>
+</div>
+                        <div>
+<span class="label">Renewals used</span>
+<span class="value">@loan.RenewalCount</span>
+</div>
+                        <form method="post" asp-page-handler="Renew" asp-route-loanId="@loan.Id">
+                            <input type="hidden" name="rowVersion" value="@Convert.ToBase64String(loan.RowVersion)" />
+                            <button class="renew" type="submit">Renew loan</button>
+                        </form>
+                    </article>
+}
+            </section>
+}
+    </main>
+</body>
+</html>

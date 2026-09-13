@@ -1,0 +1,125 @@
+@page
+@model LibrarySystem.Pages.Dashboards.CatalogModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Catalog";
+    ViewData["ActiveNavigation"] = "Catalog";
+    var hasPrevious = Model.Books.PageNumber > 1;
+    var hasNext = Model.Books.PageNumber * Model.Books.PageSize < Model.Books.TotalCount;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Catalog | School Library</title>
+    <link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true" />
+</head>
+<body>
+    <partial name="_DashboardHeader" />
+    <main class="page">
+        <div class="page-heading">
+<div>
+<h1>Library catalog</h1>
+<p class="subheading">Browse titles and monitor physical-copy availability and location.</p>
+</div>
+<div class="row-actions">
+<a class="button secondary" asp-page="/Dashboards/CatalogReferences">Reference data</a>
+<a class="button" asp-page="/Dashboards/Books">Manage books</a>
+</div>
+</div>
+        <form class="filters" method="get">
+            <input asp-for="SearchTerm" type="search" placeholder="Title, ISBN, author, or barcode" aria-label="Search catalog" />
+            <select asp-for="AuthorId" aria-label="Author">
+                <option value="">All authors</option>
+                @foreach (var author in Model.Authors){
+<option value="@author.Id">@author.Name</option>
+}
+            </select>
+            <select asp-for="CategoryId" aria-label="Category">
+                <option value="">All categories</option>
+                @foreach (var category in Model.Categories){
+<option value="@category.Id">@category.Name</option>
+}
+            </select>
+            <button class="button" type="submit">Search</button>
+            <label>
+<input asp-for="IncludeArchived" /> Include archived titles</label>
+        </form>
+@if (TempData["StatusMessage"] is string statusMessage){
+<div class="notice" role="status">@statusMessage</div>
+}
+@if (TempData["ErrorMessage"] is string errorMessage){
+<div class="notice error" role="alert">@errorMessage</div>
+}
+        <section class="data-panel" aria-label="Catalog results">
+            @if (Model.Books.Items.Count == 0){
+<div class="empty">No catalog titles match the selected filters.</div>
+}
+            else {
+                <table>
+<thead>
+<tr>
+<th>Title</th>
+<th>ISBN</th>
+<th>Authors</th>
+<th>Categories</th>
+<th>Copies/location</th>
+<th>Status</th>
+<th>
+</th>
+</tr>
+</thead>
+                <tbody>
+                @foreach (var book in Model.Books.Items){
+<tr>
+                        <td>
+<span class="primary">@book.Title</span>
+<span class="secondary-text">@(book.Publisher ?? "Publisher not specified") @(book.PublicationYear.HasValue ? $"· {book.PublicationYear}" : "")</span>
+</td>
+                        <td>@(book.Isbn ?? "—")</td>
+<td>@(book.Authors.Count == 0 ? "—" : string.Join(", ", book.Authors))</td>
+                        <td>@(book.Categories.Count == 0 ? "—" : string.Join(", ", book.Categories))</td>
+                        <td>
+<span class="primary">@book.AvailableCopies available</span>
+<span class="secondary-text">@book.TotalCopies total · @(book.Copies.Select(c => c.ShelfCode).FirstOrDefault(s => s is not null) ?? "location unassigned")</span>
+</td>
+                        <td>
+<span class="badge @(book.IsArchived ? "archived" : "")">@(book.IsArchived ? "Archived" : "Active")</span>
+</td>
+                        <td>
+<div class="row-actions">
+<a class="small-button" asp-page="/Dashboards/BookDetails" asp-route-id="@book.Id">Details</a>
+<form method="post" asp-page-handler="@(book.IsArchived ? "Restore" : "Archive")" data-confirm="Change this title’s active catalog status?">
+                            <input type="hidden" name="id" value="@book.Id" />
+                            <input type="hidden" name="rowVersion" value="@Convert.ToBase64String(book.RowVersion)" />
+                            <input type="hidden" asp-for="SearchTerm" />
+<input type="hidden" asp-for="AuthorId" />
+<input type="hidden" asp-for="CategoryId" />
+<input type="hidden" asp-for="IncludeArchived" />
+<input type="hidden" asp-for="PageNumber" />
+                            <button class="small-button" type="submit">@(book.IsArchived ? "Restore" : "Archive")</button>
+                        </form>
+</div>
+</td>
+                    </tr>
+}
+                </tbody>
+</table>
+}
+        </section>
+        <div class="pagination">
+<span>@Model.Books.TotalCount title(s)</span>
+<div class="pagination-links">
+            @if (hasPrevious){
+<a class="button secondary" asp-route-SearchTerm="@Model.SearchTerm" asp-route-AuthorId="@Model.AuthorId" asp-route-CategoryId="@Model.CategoryId" asp-route-IncludeArchived="@Model.IncludeArchived" asp-route-PageNumber="@(Model.Books.PageNumber - 1)">Previous</a>
+}
+@if (hasNext){
+<a class="button secondary" asp-route-SearchTerm="@Model.SearchTerm" asp-route-AuthorId="@Model.AuthorId" asp-route-CategoryId="@Model.CategoryId" asp-route-IncludeArchived="@Model.IncludeArchived" asp-route-PageNumber="@(Model.Books.PageNumber + 1)">Next</a>
+}
+        </div>
+</div>
+    </main>
+<script src="~/js/security-ui.js" asp-append-version="true"></script>
+</body>
+</html>

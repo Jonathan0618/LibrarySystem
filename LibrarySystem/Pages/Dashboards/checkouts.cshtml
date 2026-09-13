@@ -1,0 +1,169 @@
+@page "/Dashboards/Checkouts"
+@using LibrarySystem.Domain.Catalog
+@using LibrarySystem.Domain.Circulation
+@model LibrarySystem.Pages.Dashboards.CheckoutsModel
+@{
+    Layout = null;
+    ViewData["ActiveNavigation"] = "Checkouts";
+    var hasPreviousPage = Model.Loans.PageNumber > 1;
+    var hasNextPage = Model.Loans.PageNumber * Model.Loans.PageSize < Model.Loans.TotalCount;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Checkouts | School Library</title>
+    <link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true" />
+</head>
+<body>
+    <partial name="_DashboardHeader" />
+
+    <main class="page">
+        <div class="page-heading">
+            <div>
+                <h1>Checkouts</h1>
+                <p class="subheading">Issue, renew, and return library books.</p>
+            </div>
+            <a class="button secondary" asp-page="./CirculationSettings">Policies and closures</a>
+        </div>
+
+        <section class="form-panel">
+            <h2>New checkout</h2>
+            <form method="post" asp-page-handler="Checkout" class="checkout-form">
+                <div asp-validation-summary="ModelOnly" class="validation-errors">
+</div>
+
+                <label asp-for="CheckoutMemberNumber">
+</label>
+                <input asp-for="CheckoutMemberNumber" placeholder="e.g. STU-0001" />
+
+                <label asp-for="CheckoutBarcodes">
+</label>
+                <textarea asp-for="CheckoutBarcodes" rows="3" placeholder="One barcode per line">
+</textarea>
+
+                <span asp-validation-for="CheckoutMemberNumber" class="validation-errors">
+</span>
+                <span asp-validation-for="CheckoutBarcodes" class="validation-errors">
+</span>
+
+                <button class="button" type="submit">Check out books</button>
+            </form>
+        </section>
+@if (TempData["StatusMessage"] is string statusMessage){
+<div class="notice" role="status">@statusMessage</div>
+}
+@if (TempData["ErrorMessage"] is string errorMessage){
+<div class="notice error" role="alert">@errorMessage</div>
+}
+
+        <form class="filters loan-filters" method="get">
+            <input asp-for="SearchTerm" type="search" placeholder="Member, title, or barcode" />
+            <select asp-for="Status" asp-items="Html.GetEnumSelectList<LoanStatus>()">
+                <option value="">All statuses</option>
+            </select>
+            <button class="button" type="submit">Search</button>
+        </form>
+
+        <section class="data-panel">
+            @if (Model.Loans.Items.Count == 0){
+<div class="empty">No loans match the filters.</div>
+}
+            else
+            {
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Loan</th>
+                            <th>Member</th>
+                            <th>Book</th>
+                            <th>Due</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var loan in Model.Loans.Items)
+                        {
+                            var effectiveStatus = loan.Status == LoanStatus.Active && loan.DueAtUtc < DateTime.UtcNow
+                                ? LoanStatus.Overdue
+                                : loan.Status;
+
+                            <tr>
+                                <td>
+                                    #@loan.Id
+                                    <span class="secondary-text">@loan.CheckedOutAtUtc.ToLocalTime().ToString("d")</span>
+                                </td>
+                                <td>
+<a class="small-button" asp-page="./MemberDetails" asp-route-id="@loan.MemberId">@loan.MemberNumber</a>
+</td>
+                                <td>
+                                    <span class="primary">@loan.BookTitle</span>
+                                    <span class="secondary-text">@loan.Barcode</span>
+                                </td>
+                                <td>@loan.DueAtUtc.ToLocalTime().ToString("d")</td>
+                                <td>
+                                    <span class="badge @(effectiveStatus == LoanStatus.Overdue ? "inactive" : null)">
+                                        @effectiveStatus
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (effectiveStatus is LoanStatus.Active or LoanStatus.Overdue){
+<div class="row-actions">
+                                            <form method="post" asp-page-handler="Renew">
+                                                <input type="hidden" name="loanId" value="@loan.Id" />
+                                                <input type="hidden" name="rowVersion" value="@Convert.ToBase64String(loan.RowVersion)" />
+                                                <button class="small-button" type="submit">Renew</button>
+                                            </form>
+
+                                            <form method="post" asp-page-handler="Lost" data-confirm="Mark this loan and physical copy as lost and assess the configured obligation?">
+                                                <input type="hidden" name="loanId" value="@loan.Id" />
+                                                <input type="hidden" name="rowVersion" value="@Convert.ToBase64String(loan.RowVersion)" />
+                                                <input name="notes" maxlength="500" placeholder="Lost-item notes" />
+                                                <button class="small-button danger" type="submit">Mark lost</button>
+                                            </form>
+
+                                            <form method="post" asp-page-handler="Return" class="return-form">
+                                                <input type="hidden" name="loanId" value="@loan.Id" />
+                                                <input type="hidden" name="rowVersion" value="@Convert.ToBase64String(loan.RowVersion)" />
+                                                <select name="condition"
+                                                        aria-label="Return condition"
+                                                        asp-items="Html.GetEnumSelectList<BookCondition>()">
+</select>
+                                                <input name="notes" maxlength="500" placeholder="Notes" />
+                                                <button class="small-button" type="submit">Return</button>
+                                            </form>
+                                        </div>
+}
+                                </td>
+                            </tr>
+}
+                    </tbody>
+                </table>
+}
+        </section>
+
+        <div class="pagination">
+            <span>@Model.Loans.TotalCount loan(s)</span>
+            <div class="pagination-links">
+                @if (hasPreviousPage){
+<a class="button secondary"
+                       asp-route-SearchTerm="@Model.SearchTerm"
+                       asp-route-Status="@Model.Status"
+                       asp-route-PageNumber="@(Model.Loans.PageNumber - 1)">Previous</a>
+}
+@if (hasNextPage){
+<a class="button secondary"
+                       asp-route-SearchTerm="@Model.SearchTerm"
+                       asp-route-Status="@Model.Status"
+                       asp-route-PageNumber="@(Model.Loans.PageNumber + 1)">Next</a>
+}
+            </div>
+        </div>
+    </main>
+
+    <partial name="_ValidationScriptsPartial" />
+<script src="~/js/security-ui.js" asp-append-version="true"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+.fine-filters { grid-template-columns: minmax(240px, 2fr) minmax(180px, 1fr) auto; }
+.checkbox-field { display:flex; align-items:center; gap:.5rem; }
+.fine-list { margin-top:1rem; }
+.fine-card { margin-bottom:1rem; }
+.fine-balance { display:block; margin-top:.4rem; text-align:right; font-size:1.35rem; }
+.fine-action-form { display:grid; grid-template-columns: 120px minmax(220px,2fr) minmax(180px,1fr) auto; align-items:end; gap:.6rem; margin:1rem 0; }
+.fine-action-form label { display:flex; flex-direction:column; gap:.3rem; color:#39483d; font-size:.82rem; font-weight:600; }
+.fine-action-form input,.fine-action-form select { padding:.55rem; border:1px solid #cfc3a5; border-radius:4px; background:#fffdf8; }
+details summary { margin:.75rem 0; color:#35523c; cursor:pointer; font-weight:600; }
+@media(max-width:800px){.fine-filters,.fine-action-form{grid-template-columns:1fr;}}

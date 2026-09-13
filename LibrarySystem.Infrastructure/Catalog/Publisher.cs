@@ -15,5 +15,7 @@ public sealed class Publisher
     [MaxLength(200)]
     public required string Name { get; set; }
 
+    public bool IsActive { get; set; } = true;
+
     public ICollection<Book> Books { get; set; } = [];
 }

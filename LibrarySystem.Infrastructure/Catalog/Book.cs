@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using LibrarySystem.Infrastructure.Reservations;
 
 namespace LibrarySystem.Infrastructure.Catalog;
 
@@ -54,4 +55,6 @@ public sealed class Book
     public ICollection<BookCategory> BookCategories { get; set; } = [];
 
     public ICollection<BookCopy> Copies { get; set; } = [];
+
+    public ICollection<Reservation> Reservations { get; set; } = [];
 }

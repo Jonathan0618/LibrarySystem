@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using LibrarySystem.Application.Common;
 using LibrarySystem.Infrastructure.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -8,7 +9,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 namespace LibrarySystem.Areas.Identity.Pages.Account;
 
 [AllowAnonymous]
-public sealed class LoginModel(SignInManager<ApplicationUser> signInManager) : PageModel
+public sealed class LoginModel( SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager) : PageModel
 {
     [BindProperty]
     public InputModel Input { get; set; } = new();
@@ -39,12 +40,34 @@ public sealed class LoginModel(SignInManager<ApplicationUser> signInManager) : P
         var result = await signInManager.PasswordSignInAsync(
             Input.Email.Trim(),
             Input.Password,
-            Input.RememberMe,
+            isPersistent: false,
             lockoutOnFailure: true);
 
         if (result.Succeeded)
         {
-            return LocalRedirect(ReturnUrl);
+            var user = await userManager.FindByEmailAsync(Input.Email.Trim());
+
+            if (user?.MustChangePassword == true)
+            {
+                return RedirectToPage("/Account/ChangePassword", new { area = "Identity", returnUrl = ReturnUrl });
+            }
+
+            // Only honor an explicit returnUrl (e.g. someone was redirected here
+            // while trying to open a specific deep-linked page).
+            if (!string.IsNullOrWhiteSpace(returnUrl) &&
+                returnUrl != "/" &&
+                Url.IsLocalUrl(returnUrl))
+            {
+                return LocalRedirect(returnUrl);
+            }
+
+            // Otherwise, send them to the dashboard appropriate for their role.
+            var isStaff = user is not null &&
+                (await userManager.IsInRoleAsync(user, "Librarian")
+                    || await userManager.IsInRoleAsync(user, "Administrator"));
+
+            var homePage = isStaff ? "/Dashboards/LibrarianDashboard" : "/Dashboards/StudentDashboard";
+            return LocalRedirect(Url.Page(homePage) ?? homePage);
         }
 
         if (result.IsLockedOut)
@@ -69,18 +92,23 @@ public sealed class LoginModel(SignInManager<ApplicationUser> signInManager) : P
 
     private string NormalizeReturnUrl(string? returnUrl)
     {
-        if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+        if (!string.IsNullOrWhiteSpace(returnUrl) &&
+            returnUrl != "/" &&
+            Url.IsLocalUrl(returnUrl))
         {
             return returnUrl;
         }
 
-        return Url.Content("~/");
+        // No safe explicit returnUrl was provided. The role-based fallback
+        // destination is decided in OnPostAsync, once we know whether sign-in
+        // succeeded and who actually signed in.
+        return "/";
     }
 
     public sealed class InputModel
     {
         [Required]
-        [EmailAddress]
+        [EmailAddress, SchoolEmailAddress]
         [MaxLength(256)]
         [Display(Name = "School email")]
         public string Email { get; set; } = string.Empty;
@@ -88,8 +116,5 @@ public sealed class LoginModel(SignInManager<ApplicationUser> signInManager) : P
         [Required]
         [DataType(DataType.Password)]
         public string Password { get; set; } = string.Empty;
-
-        [Display(Name = "Keep me signed in")]
-        public bool RememberMe { get; set; }
     }
 }

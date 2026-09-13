@@ -61,9 +61,125 @@ namespace LibrarySystem.Infrastructure.Data.Migrations
 
                     b.HasIndex("CreatedAtUtc");
 
+                    b.HasIndex("CreatedAtUtc", "Id");
+
                     b.HasIndex("TargetType", "TargetId");
 
-                    b.ToTable("AuditLogs");
+                    b.ToTable("AuditLogs", (string)null);
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.AcquisitionBudget", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("AllocatedAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Year")
+                        .IsUnique();
+
+                    b.ToTable("AcquisitionBudgets");
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.AcquisitionReceipt", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AcquisitionRecordId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("BookCopyId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("ReceivedAtUtc")
+                        .HasPrecision(0)
+                        .HasColumnType("datetime2(0)");
+
+                    b.Property<string>("ReceivedByUserId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AcquisitionRecordId");
+
+                    b.HasIndex("BookCopyId")
+                        .IsUnique();
+
+                    b.ToTable("AcquisitionReceipts");
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.AcquisitionRecord", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("BookId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasPrecision(0)
+                        .HasColumnType("datetime2(0)");
+
+                    b.Property<string>("DonationSource")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("OrderNumber")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("QuantityOrdered")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Source")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("UnitCost")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookId");
+
+                    b.HasIndex("OrderNumber")
+                        .IsUnique();
+
+                    b.ToTable("AcquisitionRecords");
                 });
 
             modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.Author", b =>
@@ -73,6 +189,11 @@ namespace LibrarySystem.Infrastructure.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -84,7 +205,7 @@ namespace LibrarySystem.Infrastructure.Data.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("CatalogAuthors");
+                    b.ToTable("CatalogAuthors", (string)null);
                 });
 
             modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.Book", b =>
@@ -151,7 +272,7 @@ namespace LibrarySystem.Infrastructure.Data.Migrations
 
                     b.HasIndex("Title");
 
-                    b.ToTable("CatalogBooks");
+                    b.ToTable("CatalogBooks", (string)null);
                 });
 
             modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.BookAuthor", b =>
@@ -166,7 +287,7 @@ namespace LibrarySystem.Infrastructure.Data.Migrations
 
                     b.HasIndex("AuthorId");
 
-                    b.ToTable("CatalogBookAuthors");
+                    b.ToTable("CatalogBookAuthors", (string)null);
                 });
 
             modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.BookCategory", b =>
@@ -181,7 +302,7 @@ namespace LibrarySystem.Infrastructure.Data.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("CatalogBookCategories");
+                    b.ToTable("CatalogBookCategories", (string)null);
                 });
 
             modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.BookCopy", b =>
@@ -238,7 +359,9 @@ namespace LibrarySystem.Infrastructure.Data.Migrations
 
                     b.HasIndex("BookId", "Status");
 
-                    b.ToTable("CatalogBookCopies");
+                    b.HasIndex("Status", "BookId");
+
+                    b.ToTable("CatalogBookCopies", (string)null);
                 });
 
             modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.Category", b =>
@@ -248,6 +371,11 @@ namespace LibrarySystem.Infrastructure.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -259,7 +387,128 @@ namespace LibrarySystem.Infrastructure.Data.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("CatalogCategories");
+                    b.ToTable("CatalogCategories", (string)null);
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.CopyWithdrawal", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("ActorUserId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<long>("BookCopyId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("WithdrawnAtUtc")
+                        .HasPrecision(0)
+                        .HasColumnType("datetime2(0)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookCopyId")
+                        .IsUnique();
+
+                    b.ToTable("CopyWithdrawals");
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.InventoryExpectedCopy", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("BookCopyId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("InventorySessionId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookCopyId");
+
+                    b.HasIndex("InventorySessionId", "BookCopyId")
+                        .IsUnique();
+
+                    b.ToTable("InventoryExpectedCopies");
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.InventoryScan", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("BookCopyId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("FoundAtUtc")
+                        .HasPrecision(0)
+                        .HasColumnType("datetime2(0)");
+
+                    b.Property<string>("FoundByUserId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<long>("InventorySessionId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookCopyId");
+
+                    b.HasIndex("InventorySessionId", "BookCopyId")
+                        .IsUnique();
+
+                    b.ToTable("InventoryScans");
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.InventorySession", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasPrecision(0)
+                        .HasColumnType("datetime2(0)");
+
+                    b.Property<string>("CreatedByUserId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("StartedAtUtc")
+                        .HasPrecision(0)
+                        .HasColumnType("datetime2(0)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("InventorySessions");
                 });
 
             modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.Publisher", b =>
@@ -269,6 +518,11 @@ namespace LibrarySystem.Infrastructure.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -280,7 +534,7 @@ namespace LibrarySystem.Infrastructure.Data.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("CatalogPublishers");
+                    b.ToTable("CatalogPublishers", (string)null);
                 });
 
             modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.ShelfLocation", b =>
@@ -300,12 +554,308 @@ namespace LibrarySystem.Infrastructure.Data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.HasKey("Id");
 
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("CatalogShelfLocations");
+                    b.ToTable("CatalogShelfLocations", (string)null);
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Circulation.LibraryPolicy", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("AllowRenewalWhenOverdue")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasPrecision(0)
+                        .HasColumnType("datetime2(0)");
+
+                    b.Property<decimal>("DailyOverdueFine")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal>("DamagedItemFine")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<int>("FineGracePeriodDays")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("LoanPeriodDays")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("LostItemFine")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<int>("MaximumActiveLoans")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MaximumActiveReservations")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("MaximumOutstandingBalanceForCheckout")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal>("MaximumOverdueFine")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<int>("MaximumRenewals")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MemberType")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<bool>("SkipWeekendsAndSchoolHolidays")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasPrecision(0)
+                        .HasColumnType("datetime2(0)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MemberType")
+                        .IsUnique();
+
+                    b.ToTable("CirculationPolicies", (string)null);
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Circulation.Loan", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("BookCopyId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("CheckedOutAtUtc")
+                        .HasPrecision(0)
+                        .HasColumnType("datetime2(0)");
+
+                    b.Property<Guid>("CheckoutOperationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DueAtUtc")
+                        .HasPrecision(0)
+                        .HasColumnType("datetime2(0)");
+
+                    b.Property<long>("MemberId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("RenewalCount")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ReturnedAtUtc")
+                        .HasPrecision(0)
+                        .HasColumnType("datetime2(0)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BookCopyId", "Status");
+
+                    b.HasIndex("CheckedOutAtUtc", "Id");
+
+                    b.HasIndex("CheckoutOperationId", "BookCopyId")
+                        .IsUnique();
+
+                    b.HasIndex("DueAtUtc", "Status");
+
+                    b.HasIndex("MemberId", "Status");
+
+                    b.HasIndex("Status", "DueAtUtc");
+
+                    b.ToTable("CirculationLoans", (string)null);
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Circulation.LoanHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("Action")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ActorUserId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<long>("LoanId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("OccurredAtUtc")
+                        .HasPrecision(0)
+                        .HasColumnType("datetime2(0)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LoanId", "OccurredAtUtc");
+
+                    b.ToTable("CirculationLoanHistory", (string)null);
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Circulation.SchoolHoliday", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Date")
+                        .IsUnique();
+
+                    b.ToTable("SchoolHolidays", (string)null);
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Fines.Fine", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<decimal>("AssessedAmount")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal>("Balance")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasPrecision(0)
+                        .HasColumnType("datetime2(0)");
+
+                    b.Property<long?>("LoanId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("MemberId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasPrecision(0)
+                        .HasColumnType("datetime2(0)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LoanId", "Type")
+                        .IsUnique()
+                        .HasFilter("[LoanId] IS NOT NULL");
+
+                    b.HasIndex("MemberId", "Status");
+
+                    b.HasIndex("Status", "MemberId");
+
+                    b.ToTable("Fines", (string)null);
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Fines.FineTransaction", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("ActorUserId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasPrecision(0)
+                        .HasColumnType("datetime2(0)");
+
+                    b.Property<long>("FineId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FineId", "CreatedAtUtc");
+
+                    b.ToTable("FineTransactions", (string)null);
                 });
 
             modelBuilder.Entity("LibrarySystem.Infrastructure.Identity.ApplicationRole", b =>
@@ -380,6 +930,9 @@ namespace LibrarySystem.Infrastructure.Data.Migrations
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("MustChangePassword")
+                        .HasColumnType("bit");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -477,7 +1030,131 @@ namespace LibrarySystem.Infrastructure.Data.Migrations
 
                     b.HasIndex("MemberType", "IsActive");
 
-                    b.ToTable("LibraryMembers");
+                    b.ToTable("LibraryMembers", (string)null);
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Notifications.QueuedNotification", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("AttemptCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasPrecision(0)
+                        .HasColumnType("datetime2(0)");
+
+                    b.Property<string>("DeduplicationKey")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("LastError")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("NextAttemptAtUtc")
+                        .HasPrecision(0)
+                        .HasColumnType("datetime2(0)");
+
+                    b.Property<string>("RecipientEmail")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTime?>("SentAtUtc")
+                        .HasPrecision(0)
+                        .HasColumnType("datetime2(0)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeduplicationKey")
+                        .IsUnique();
+
+                    b.HasIndex("Status", "NextAttemptAtUtc");
+
+                    b.ToTable("QueuedNotifications", (string)null);
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Reservations.Reservation", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long?>("AssignedBookCopyId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("BookId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("CompletedAtUtc")
+                        .HasPrecision(0)
+                        .HasColumnType("datetime2(0)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasPrecision(0)
+                        .HasColumnType("datetime2(0)");
+
+                    b.Property<DateTime?>("ExpiresAtUtc")
+                        .HasPrecision(0)
+                        .HasColumnType("datetime2(0)");
+
+                    b.Property<long>("MemberId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("ReadyAtUtc")
+                        .HasPrecision(0)
+                        .HasColumnType("datetime2(0)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssignedBookCopyId")
+                        .IsUnique()
+                        .HasFilter("[AssignedBookCopyId] IS NOT NULL");
+
+                    b.HasIndex("MemberId", "Status");
+
+                    b.HasIndex("BookId", "Status", "CreatedAtUtc");
+
+                    b.ToTable("Reservations", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -590,6 +1267,36 @@ namespace LibrarySystem.Infrastructure.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.AcquisitionReceipt", b =>
+                {
+                    b.HasOne("LibrarySystem.Infrastructure.Catalog.AcquisitionRecord", "AcquisitionRecord")
+                        .WithMany("Receipts")
+                        .HasForeignKey("AcquisitionRecordId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LibrarySystem.Infrastructure.Catalog.BookCopy", "BookCopy")
+                        .WithMany()
+                        .HasForeignKey("BookCopyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AcquisitionRecord");
+
+                    b.Navigation("BookCopy");
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.AcquisitionRecord", b =>
+                {
+                    b.HasOne("LibrarySystem.Infrastructure.Catalog.Book", "Book")
+                        .WithMany()
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Book");
+                });
+
             modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.Book", b =>
                 {
                     b.HasOne("LibrarySystem.Infrastructure.Catalog.Publisher", "Publisher")
@@ -656,6 +1363,114 @@ namespace LibrarySystem.Infrastructure.Data.Migrations
                     b.Navigation("ShelfLocation");
                 });
 
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.CopyWithdrawal", b =>
+                {
+                    b.HasOne("LibrarySystem.Infrastructure.Catalog.BookCopy", "BookCopy")
+                        .WithMany()
+                        .HasForeignKey("BookCopyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("BookCopy");
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.InventoryExpectedCopy", b =>
+                {
+                    b.HasOne("LibrarySystem.Infrastructure.Catalog.BookCopy", "BookCopy")
+                        .WithMany()
+                        .HasForeignKey("BookCopyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LibrarySystem.Infrastructure.Catalog.InventorySession", "InventorySession")
+                        .WithMany("ExpectedCopies")
+                        .HasForeignKey("InventorySessionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("BookCopy");
+
+                    b.Navigation("InventorySession");
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.InventoryScan", b =>
+                {
+                    b.HasOne("LibrarySystem.Infrastructure.Catalog.BookCopy", "BookCopy")
+                        .WithMany()
+                        .HasForeignKey("BookCopyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LibrarySystem.Infrastructure.Catalog.InventorySession", "InventorySession")
+                        .WithMany("Scans")
+                        .HasForeignKey("InventorySessionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("BookCopy");
+
+                    b.Navigation("InventorySession");
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Circulation.Loan", b =>
+                {
+                    b.HasOne("LibrarySystem.Infrastructure.Catalog.BookCopy", "BookCopy")
+                        .WithMany("Loans")
+                        .HasForeignKey("BookCopyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LibrarySystem.Infrastructure.Members.LibraryMember", "Member")
+                        .WithMany("Loans")
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("BookCopy");
+
+                    b.Navigation("Member");
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Circulation.LoanHistory", b =>
+                {
+                    b.HasOne("LibrarySystem.Infrastructure.Circulation.Loan", "Loan")
+                        .WithMany("History")
+                        .HasForeignKey("LoanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Loan");
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Fines.Fine", b =>
+                {
+                    b.HasOne("LibrarySystem.Infrastructure.Circulation.Loan", "Loan")
+                        .WithMany()
+                        .HasForeignKey("LoanId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LibrarySystem.Infrastructure.Members.LibraryMember", "Member")
+                        .WithMany()
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Loan");
+
+                    b.Navigation("Member");
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Fines.FineTransaction", b =>
+                {
+                    b.HasOne("LibrarySystem.Infrastructure.Fines.Fine", "Fine")
+                        .WithMany("Transactions")
+                        .HasForeignKey("FineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Fine");
+                });
+
             modelBuilder.Entity("LibrarySystem.Infrastructure.Members.LibraryMember", b =>
                 {
                     b.HasOne("LibrarySystem.Infrastructure.Identity.ApplicationUser", "User")
@@ -665,6 +1480,32 @@ namespace LibrarySystem.Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Reservations.Reservation", b =>
+                {
+                    b.HasOne("LibrarySystem.Infrastructure.Catalog.BookCopy", "AssignedBookCopy")
+                        .WithOne("AssignedReservation")
+                        .HasForeignKey("LibrarySystem.Infrastructure.Reservations.Reservation", "AssignedBookCopyId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LibrarySystem.Infrastructure.Catalog.Book", "Book")
+                        .WithMany("Reservations")
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LibrarySystem.Infrastructure.Members.LibraryMember", "Member")
+                        .WithMany("Reservations")
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AssignedBookCopy");
+
+                    b.Navigation("Book");
+
+                    b.Navigation("Member");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -718,6 +1559,11 @@ namespace LibrarySystem.Infrastructure.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.AcquisitionRecord", b =>
+                {
+                    b.Navigation("Receipts");
+                });
+
             modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.Author", b =>
                 {
                     b.Navigation("BookAuthors");
@@ -730,11 +1576,27 @@ namespace LibrarySystem.Infrastructure.Data.Migrations
                     b.Navigation("BookCategories");
 
                     b.Navigation("Copies");
+
+                    b.Navigation("Reservations");
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.BookCopy", b =>
+                {
+                    b.Navigation("AssignedReservation");
+
+                    b.Navigation("Loans");
                 });
 
             modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.Category", b =>
                 {
                     b.Navigation("BookCategories");
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.InventorySession", b =>
+                {
+                    b.Navigation("ExpectedCopies");
+
+                    b.Navigation("Scans");
                 });
 
             modelBuilder.Entity("LibrarySystem.Infrastructure.Catalog.Publisher", b =>
@@ -747,9 +1609,26 @@ namespace LibrarySystem.Infrastructure.Data.Migrations
                     b.Navigation("BookCopies");
                 });
 
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Circulation.Loan", b =>
+                {
+                    b.Navigation("History");
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Fines.Fine", b =>
+                {
+                    b.Navigation("Transactions");
+                });
+
             modelBuilder.Entity("LibrarySystem.Infrastructure.Identity.ApplicationUser", b =>
                 {
                     b.Navigation("LibraryMember");
+                });
+
+            modelBuilder.Entity("LibrarySystem.Infrastructure.Members.LibraryMember", b =>
+                {
+                    b.Navigation("Loans");
+
+                    b.Navigation("Reservations");
                 });
 #pragma warning restore 612, 618
         }

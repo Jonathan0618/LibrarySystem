@@ -10,4 +10,7 @@ public sealed class HttpCurrentUser(IHttpContextAccessor httpContextAccessor) : 
         .FindFirstValue(ClaimTypes.NameIdentifier);
 
     public bool IsAuthenticated => httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated == true;
+
+    public bool IsInRole(string roleName) =>
+        httpContextAccessor.HttpContext?.User.IsInRole(roleName) == true;
 }

@@ -1,12 +1,15 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using LibrarySystem.Domain.Catalog;
+using LibrarySystem.Infrastructure.Circulation;
+using LibrarySystem.Infrastructure.Reservations;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibrarySystem.Infrastructure.Catalog;
 
 [Index(nameof(Barcode), IsUnique = true)]
 [Index(nameof(BookId), nameof(Status))]
+[Index(nameof(Status), nameof(BookId))]
 [Table("CatalogBookCopies")]
 public sealed class BookCopy
 {
@@ -50,4 +53,8 @@ public sealed class BookCopy
 
     [Timestamp]
     public byte[] RowVersion { get; set; } = [];
+
+    public ICollection<Loan> Loans { get; set; } = [];
+
+    public Reservation? AssignedReservation { get; set; }
 }

@@ -1,0 +1,223 @@
+@page "/Dashboards/Reports"
+@using LibrarySystem.Domain.Circulation
+@using LibrarySystem.Domain.Members
+@model LibrarySystem.Pages.Dashboards.ReportsModel
+@{
+    Layout = null;
+    ViewData["ActiveNavigation"] = "Reports";
+    var previous = Model.Report.PageNumber > 1;
+    var next = Model.Report.PageNumber * Model.Report.PageSize < Model.Report.TotalLoans;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Reports | School Library</title>
+    <link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true" />
+</head>
+<body>
+    <partial name="_DashboardHeader" />
+    <main class="page">
+        <div class="page-heading">
+            <div>
+<h1>Operational reports</h1>
+<p class="subheading">Review library activity, inventory exceptions, and balances.</p>
+</div>
+            <a class="button" asp-page-handler="Export" asp-route-FromDate="@Model.FromDate?.ToString("yyyy-MM-dd")" asp-route-ToDate="@Model.ToDate?.ToString("yyyy-MM-dd")" asp-route-Status="@Model.Status" asp-route-MemberType="@Model.MemberType" asp-route-CategoryId="@Model.CategoryId">Export CSV</a>
+        </div>
+        <form class="filters report-filters" method="get">
+            <label>From<input asp-for="FromDate" type="date" />
+</label>
+            <label>To<input asp-for="ToDate" type="date" />
+</label>
+            <label>Status<select asp-for="Status" asp-items="Html.GetEnumSelectList<LoanStatus>()">
+<option value="">All statuses</option>
+</select>
+</label>
+            <label>Member type<select asp-for="MemberType" asp-items="Html.GetEnumSelectList<MemberType>()">
+<option value="">All member types</option>
+</select>
+</label>
+            <label>Category<select asp-for="CategoryId">
+<option value="">All categories</option>@foreach (var category in Model.Categories){
+<option value="@category.Id">@category.Name</option>
+}</select>
+</label>
+            <button class="button" type="submit">Apply</button>
+        </form>
+        <div asp-validation-summary="ModelOnly" class="notice error">
+</div>
+        <section class="summary-grid">
+            <article>
+<span>Total loans</span>
+<strong>@Model.Report.TotalLoans</strong>
+</article>
+            <article>
+<span>Returned</span>
+<strong>@Model.Report.ReturnedLoans</strong>
+</article>
+            <article>
+<span>Overdue</span>
+<strong>@Model.Report.OverdueLoans</strong>
+</article>
+            <article>
+<span>Unique members</span>
+<strong>@Model.Report.UniqueMembers</strong>
+</article>
+        </section>
+        <section class="report-grid">
+            <article class="form-panel">
+<h2>Popular books</h2>
+<table>
+<thead>
+<tr>
+<th>Title</th>
+<th>Checkouts</th>
+</tr>
+</thead>
+<tbody>@foreach (var item in Model.OperationalReport.PopularBooks){
+<tr>
+<td>@item.Title</td>
+<td>@item.CheckoutCount</td>
+</tr>
+}</tbody>
+</table>
+</article>
+            <article class="form-panel">
+<h2>Inactive books</h2>
+<table>
+<thead>
+<tr>
+<th>Title</th>
+<th>Last checkout</th>
+</tr>
+</thead>
+<tbody>@foreach (var item in Model.OperationalReport.InactiveBooks){
+<tr>
+<td>@item.Title</td>
+<td>@(item.LastCheckedOutAtUtc?.ToLocalTime().ToString("d") ?? "Never")</td>
+</tr>
+}</tbody>
+</table>
+</article>
+            <article class="form-panel">
+<h2>Lost or damaged copies</h2>
+<table>
+<thead>
+<tr>
+<th>Copy</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>@foreach (var item in Model.OperationalReport.LostOrDamagedCopies){
+<tr>
+<td>
+<span class="primary">@item.Title</span>
+<span class="secondary-text">@item.Barcode</span>
+</td>
+<td>
+<span class="badge inactive">@item.Status</span>
+</td>
+</tr>
+}</tbody>
+</table>
+</article>
+            <article class="form-panel">
+<h2>Fine balances</h2>
+<table>
+<thead>
+<tr>
+<th>Member</th>
+<th>Balance</th>
+</tr>
+</thead>
+<tbody>@foreach (var item in Model.OperationalReport.FineBalances){
+<tr>
+<td>
+<span class="primary">@item.MemberName</span>
+<span class="secondary-text">@item.MemberNumber</span>
+</td>
+<td>@CurrencyFormatter.Format(item.Balance)</td>
+</tr>
+}</tbody>
+</table>
+</article>
+        </section>
+        <section class="data-panel">
+<div class="section-title">
+<h2>Member activity</h2>
+</div>
+<table>
+<thead>
+<tr>
+<th>Member</th>
+<th>Type</th>
+<th>Checkouts</th>
+<th>Returns</th>
+<th>Reservations</th>
+</tr>
+</thead>
+<tbody>@foreach (var item in Model.OperationalReport.MemberActivity){
+<tr>
+<td>
+<span class="primary">@item.MemberName</span>
+<span class="secondary-text">@item.MemberNumber</span>
+</td>
+<td>@item.MemberType</td>
+<td>@item.CheckoutCount</td>
+<td>@item.ReturnCount</td>
+<td>@item.ReservationCount</td>
+</tr>
+}</tbody>
+</table>
+</section>
+        <section class="data-panel">
+<div class="section-title">
+<h2>Circulation details</h2>
+</div>
+@if (Model.Report.Items.Count == 0){
+<div class="empty">No circulation records match the filters.</div>
+} else { <table>
+<thead>
+<tr>
+<th>Loan</th>
+<th>Member</th>
+<th>Title</th>
+<th>Checked out</th>
+<th>Due</th>
+<th>Returned</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>@foreach (var loan in Model.Report.Items) { var state = loan.Status == LoanStatus.Active && loan.DueAtUtc < DateTime.UtcNow ? LoanStatus.Overdue : loan.Status; <tr>
+<td>#@loan.Id</td>
+<td>@loan.MemberNumber</td>
+<td>
+<span class="primary">@loan.BookTitle</span>
+<span class="secondary-text">@loan.Barcode</span>
+</td>
+<td>@loan.CheckedOutAtUtc.ToLocalTime().ToString("g")</td>
+<td>@loan.DueAtUtc.ToLocalTime().ToString("d")</td>
+<td>@(loan.ReturnedAtUtc?.ToLocalTime().ToString("g") ?? "—")</td>
+<td>
+<span class="badge @(state == LoanStatus.Overdue ? "inactive" : "")">@state</span>
+</td>
+</tr>
+}</tbody>
+</table>
+}</section>
+        <div class="pagination">
+<span>@Model.Report.TotalLoans record(s)</span>
+<div class="pagination-links">
+            @if (previous){
+<a class="button secondary" asp-route-FromDate="@Model.FromDate?.ToString("yyyy-MM-dd")" asp-route-ToDate="@Model.ToDate?.ToString("yyyy-MM-dd")" asp-route-Status="@Model.Status" asp-route-MemberType="@Model.MemberType" asp-route-CategoryId="@Model.CategoryId" asp-route-PageNumber="@(Model.Report.PageNumber - 1)">Previous</a>
+}
+@if (next){
+<a class="button secondary" asp-route-FromDate="@Model.FromDate?.ToString("yyyy-MM-dd")" asp-route-ToDate="@Model.ToDate?.ToString("yyyy-MM-dd")" asp-route-Status="@Model.Status" asp-route-MemberType="@Model.MemberType" asp-route-CategoryId="@Model.CategoryId" asp-route-PageNumber="@(Model.Report.PageNumber + 1)">Next</a>
+}
+        </div>
+</div>
+    </main>
+</body>
+</html>

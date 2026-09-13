@@ -1,0 +1,64 @@
+@page
+@using LibrarySystem.Application.Security
+@model LibrarySystem.Pages.Dashboards.RolesModel
+@{ Layout=null; ViewData["ActiveNavigation"]="Members"; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Role management | School Library</title>
+<link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true"/>
+</head>
+<body>
+<partial name="_DashboardHeader"/>
+<main class="page">
+<div class="page-heading">
+<div>
+<h1>Role management</h1>
+<p class="subheading">Administrator-only access. Removing a role invalidates that account's existing sessions.</p>
+</div>
+<a class="button secondary" asp-page="./Members">Back to members</a>
+</div>
+@if(TempData["StatusMessage"] is string status){
+<div class="notice" role="status">@status</div>
+}
+@if(TempData["ErrorMessage"] is string error){
+<div class="notice error" role="alert">@error</div>
+}
+<section class="data-panel">
+<table>
+<thead>
+<tr>
+<th>Account</th>
+<th>Status</th>
+<th>Assigned roles</th>
+</tr>
+</thead>
+<tbody>@foreach(var account in Model.Accounts){
+<tr>
+<td>
+<span class="primary">@account.DisplayName</span>
+<span class="secondary-text">@account.Email</span>
+</td>
+<td>
+<span class="badge @(!account.IsActive ? "inactive" : "")">@(account.IsActive ? "Active" : "Inactive")</span>
+</td>
+<td>
+<div class="role-grid">@foreach(var role in RoleNames.All){var hasRole=account.Roles.Contains(role);if(hasRole && role != RoleNames.Administrator){
+<span class="badge">@role (primary)</span>
+}else{<form method="post">
+<input type="hidden" name="userId" value="@account.UserId"/>
+<input type="hidden" name="roleName" value="@role"/>
+<input type="hidden" name="assigned" value="@(!hasRole)"/>
+<button class="small-button @(hasRole ? "danger" : "")" type="submit">@(hasRole ? "Remove" : "Assign") @role</button>
+</form>
+}}</div>
+</td>
+</tr>
+}</tbody>
+</table>
+</section>
+</main>
+</body>
+</html>

@@ -1,0 +1,42 @@
+@page
+@model LibrarySystem.Areas.Identity.Pages.Account.ResendEmailConfirmationModel
+@{
+    Layout = "/Areas/Identity/Pages/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Resend confirmation";
+}
+
+<section aria-labelledby="page-title">
+    <h1 id="page-title">Resend confirmation</h1>
+    <p class="lead">
+        Enter your school email and we'll queue a new link if confirmation is still required.
+    </p>
+
+    @if (Model.Submitted){
+<div class="status-panel" role="status">
+            If the account exists and still requires confirmation, a new link has been queued.
+        </div>
+}
+
+    <form method="post" novalidate>
+        <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert">
+</div>
+
+        <div class="field-group">
+            <label asp-for="Input.Email">
+</label>
+            <input asp-for="Input.Email"
+                   type="email"
+                   autocomplete="email"
+                   autofocus
+                   placeholder="name@school.edu" />
+            <span asp-validation-for="Input.Email" class="field-error">
+</span>
+        </div>
+
+        <button class="submit-button" type="submit">Send confirmation</button>
+    </form>
+
+    <nav class="identity-links" aria-label="What to do next">
+        <a asp-page="./Login">Return to sign in</a>
+    </nav>
+</section>

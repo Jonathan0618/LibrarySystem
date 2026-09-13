@@ -2,6 +2,7 @@ using LibrarySystem.Application.Security;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace LibrarySystem.Infrastructure.Identity;
@@ -10,7 +11,8 @@ public static partial class IdentitySeeder
 {
     public static async Task SeedIdentityAsync(
         this IServiceProvider services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IHostEnvironment environment)
     {
         await using var scope = services.CreateAsyncScope();
         var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
@@ -40,7 +42,7 @@ public static partial class IdentitySeeder
         if (string.IsNullOrWhiteSpace(email) && string.IsNullOrWhiteSpace(password))
         {
             LogAdministratorSeedSkipped(logger);
-            await SeedTemporaryLibrarianAsync(userManager, configuration);
+            await SeedTemporaryLibrarianAsync(userManager, configuration, environment);
             return;
         }
 
@@ -48,6 +50,21 @@ public static partial class IdentitySeeder
         {
             throw new InvalidOperationException(
                 "Both IdentitySeed:AdministratorEmail and IdentitySeed:AdministratorPassword must be configured.");
+        }
+
+        if (!configuration.GetValue<bool>("IdentitySeed:EnableAdministratorBootstrap"))
+        {
+            throw new InvalidOperationException(
+                "Administrator seed credentials are configured, but IdentitySeed:EnableAdministratorBootstrap is not enabled.");
+        }
+
+        var existingAdministrators = await userManager.GetUsersInRoleAsync(RoleNames.Administrator);
+        if (existingAdministrators.Count > 0 &&
+            !existingAdministrators.Any(user =>
+                string.Equals(user.Email, email, StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new InvalidOperationException(
+                "An administrator already exists. Refusing to bootstrap a different administrator account.");
         }
 
         var administrator = await userManager.FindByEmailAsync(email);
@@ -59,7 +76,8 @@ public static partial class IdentitySeeder
                 Email = email,
                 EmailConfirmed = true,
                 FirstName = "System",
-                LastName = "Administrator"
+                LastName = "Administrator",
+                MustChangePassword = true
             };
 
             var userResult = await userManager.CreateAsync(administrator, password);
@@ -74,13 +92,28 @@ public static partial class IdentitySeeder
             EnsureSucceeded(assignmentResult, "assign the Administrator role");
         }
 
-        await SeedTemporaryLibrarianAsync(userManager, configuration);
+        LogAdministratorBootstrapEnabled(logger, administrator.Id);
+
+        await SeedTemporaryLibrarianAsync(userManager, configuration, environment);
     }
 
     private static async Task SeedTemporaryLibrarianAsync(
         UserManager<ApplicationUser> userManager,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IHostEnvironment environment)
     {
+        var enabled = configuration.GetValue<bool>("IdentitySeed:EnableTemporaryLibrarian");
+        if (!enabled)
+        {
+            return;
+        }
+
+        if (!environment.IsDevelopment())
+        {
+            throw new InvalidOperationException(
+                "Temporary librarian seeding can only be enabled in Development.");
+        }
+
         var email = configuration["IdentitySeed:TemporaryLibrarianEmail"];
         var password = configuration["IdentitySeed:TemporaryLibrarianPassword"];
 
@@ -138,4 +171,10 @@ public static partial class IdentitySeeder
         Level = LogLevel.Information,
         Message = "Initial administrator creation was skipped because no seed credentials were configured.")]
     private static partial void LogAdministratorSeedSkipped(ILogger logger);
+
+    [LoggerMessage(
+        EventId = 2,
+        Level = LogLevel.Warning,
+        Message = "Administrator bootstrap is enabled for user {UserId}. Remove the bootstrap switch and credentials immediately after verification.")]
+    private static partial void LogAdministratorBootstrapEnabled(ILogger logger, string userId);
 }

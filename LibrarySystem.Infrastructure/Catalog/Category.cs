@@ -15,5 +15,7 @@ public sealed class Category
     [MaxLength(100)]
     public required string Name { get; set; }
 
+    public bool IsActive { get; set; } = true;
+
     public ICollection<BookCategory> BookCategories { get; set; } = [];
 }

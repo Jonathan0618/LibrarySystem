@@ -16,6 +16,9 @@ appsettings.Local.json
 *.db
 *.db-shm
 *.db-wal
+.backups/
+artifacts/
+*.bak
 
 ## OS files
 .DS_Store

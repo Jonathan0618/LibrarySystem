@@ -1,0 +1,65 @@
+@page
+@using LibrarySystem.Domain.Reservations
+@model LibrarySystem.Pages.Dashboards.MyHoldsModel
+@{ Layout = null;
+    ViewData["ActiveStudentNavigation"] = "Holds"; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>My holds | School Library</title>
+<link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/student-shell.css" asp-append-version="true" />
+</head>
+<body>
+<partial name="_StudentHeader" />
+<main class="page">
+<div class="page-heading">
+<div>
+<h1>My holds</h1>
+<p class="subheading">Track queue position and pickup deadlines.</p>
+</div>
+<a class="button secondary" asp-page="./StudentDashboard">Dashboard</a>
+</div>
+@if(TempData["StatusMessage"] is string status){
+<div class="notice">@status</div>
+}
+@if(TempData["ErrorMessage"] is string error){
+<div class="notice error">@error</div>
+}
+<section class="data-panel">@if(Model.Holds.Count==0){
+<div class="empty">You have no reservations.</div>
+}else{<table>
+<thead>
+<tr>
+<th>Title</th>
+<th>Status</th>
+<th>Queue</th>
+<th>Pickup deadline</th>
+<th>
+</th>
+</tr>
+</thead>
+<tbody>@foreach(var hold in Model.Holds){
+<tr>
+<td class="primary">@hold.BookTitle</td>
+<td>
+<span class="badge @(hold.Status is ReservationStatus.Expired or ReservationStatus.Cancelled ? "inactive" : "")">@hold.Status</span>
+</td>
+<td>@(hold.Status==ReservationStatus.Waiting ? hold.QueuePosition : "—")</td>
+<td>@(hold.ExpiresAtUtc?.ToLocalTime().ToString("g") ?? "—")</td>
+<td>@if(hold.Status is ReservationStatus.Waiting or ReservationStatus.ReadyForPickup){
+<form method="post" asp-page-handler="Cancel">
+<input type="hidden" name="id" value="@hold.Id" />
+<input type="hidden" name="rowVersion" value="@Convert.ToBase64String(hold.RowVersion)" />
+<button class="small-button danger" type="submit">Cancel</button>
+</form>
+}</td>
+</tr>
+}</tbody>
+</table>
+}</section>
+</main>
+</body>
+</html>

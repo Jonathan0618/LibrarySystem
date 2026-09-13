@@ -1,0 +1,47 @@
+@page
+@model LibrarySystem.Pages.Dashboards.ReadingHistoryModel
+@{ Layout = null;
+    ViewData["ActiveStudentNavigation"] = "History"; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Reading history | School Library</title>
+<link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/student-shell.css" asp-append-version="true" />
+</head>
+<body>
+<partial name="_StudentHeader" />
+<main class="page">
+<div class="page-heading">
+<div>
+<h1>Reading history</h1>
+<p class="subheading">Books you have previously borrowed and returned.</p>
+</div>
+<a class="button secondary" asp-page="./StudentDashboard">Dashboard</a>
+</div>
+<section class="data-panel">@if(Model.Loans.Count==0){
+<div class="empty">Your reading history is empty.</div>
+}else{<table>
+<thead>
+<tr>
+<th>Title</th>
+<th>Checked out</th>
+<th>Returned</th>
+<th>Renewals</th>
+</tr>
+</thead>
+<tbody>@foreach(var loan in Model.Loans){
+<tr>
+<td class="primary">@loan.BookTitle</td>
+<td>@loan.CheckedOutAtUtc.ToLocalTime().ToString("d")</td>
+<td>@loan.ReturnedAtUtc?.ToLocalTime().ToString("d")</td>
+<td>@loan.RenewalCount</td>
+</tr>
+}</tbody>
+</table>
+}</section>
+</main>
+</body>
+</html>

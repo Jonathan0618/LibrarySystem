@@ -1,0 +1,133 @@
+@page
+@using LibrarySystem.Domain.Members
+@model LibrarySystem.Pages.Dashboards.MembersModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Members";
+    ViewData["ActiveNavigation"] = "Members";
+    var hasPrevious = Model.Members.PageNumber > 1;
+    var hasNext = Model.Members.PageNumber * Model.Members.PageSize < Model.Members.TotalCount;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Members | School Library</title>
+    <link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true" />
+</head>
+<body>
+    <partial name="_DashboardHeader" />
+    <main class="page">
+        <div class="page-heading">
+            <div>
+<h1>Library members</h1>
+<p class="subheading">Search and manage student, teacher, and librarian accounts.</p>
+</div>
+            <a class="button" asp-page="./AddMember">Add member</a>
+            @if (User.IsInRole("Administrator")){
+<a class="button secondary" asp-page="./Roles">Manage roles</a>
+}
+        </div>
+        <form class="filters" method="get">
+            <input asp-for="SearchTerm" type="search" placeholder="Name or member number" aria-label="Search members" />
+            <select asp-for="MemberType" aria-label="Member type">
+                <option value="">All member types</option>
+                @foreach (var type in Enum.GetValues<MemberType>()){
+<option value="@type">@type</option>
+}
+            </select>
+            <select asp-for="IsActive" aria-label="Account status">
+                <option value="">All statuses</option>
+<option value="true">Active</option>
+<option value="false">Inactive</option>
+            </select>
+            <button class="button" type="submit">Search</button>
+        </form>
+@if (TempData["StatusMessage"] is string statusMessage){
+<div class="notice" role="status">@statusMessage</div>
+}
+@if (TempData["ErrorMessage"] is string errorMessage){
+<div class="notice error" role="alert">@errorMessage</div>
+}
+        <section class="data-panel" aria-label="Member results">
+            @if (Model.Members.Items.Count == 0){
+<div class="empty">No members match the selected filters.</div>
+}
+            else {
+                <table>
+<thead>
+<tr>
+<th>Member</th>
+<th>Number</th>
+<th>Type</th>
+<th>Class or department</th>
+<th>Account</th>
+<th>Email</th>
+<th>
+</th>
+</tr>
+</thead>
+                <tbody>
+                @foreach (var member in Model.Members.Items){
+<tr>
+                        <td>
+<span class="primary">@member.FirstName @member.LastName</span>
+</td>
+                        <td>@member.MemberNumber</td>
+<td>@member.MemberType</td>
+<td>@(member.Grade ?? member.Department ?? "—")</td>
+                        <td>
+<span class="badge @(member.IsActive ? "" : "inactive")">@(member.IsActive ? "Active" : "Inactive")</span>
+</td>
+                        <td>
+<span class="badge @(member.EmailConfirmed ? "" : "inactive")">@(member.EmailConfirmed ? "Confirmed" : "Unconfirmed")</span>
+</td>
+                        <td>
+<div class="row-actions">
+                        <a class="small-button" asp-page="./MemberDetails" asp-route-id="@member.Id">View</a>
+                        <a class="small-button" asp-page="./EditMember" asp-route-id="@member.Id">Edit</a>
+                        @if (member.IsActive && !member.EmailConfirmed && (member.MemberType != MemberType.Librarian || User.IsInRole("Administrator"))){
+<form method="post" asp-page-handler="ResendConfirmation">
+                                <input type="hidden" name="id" value="@member.Id" />
+                                <input type="hidden" asp-for="SearchTerm" />
+<input type="hidden" asp-for="MemberType" />
+<input type="hidden" asp-for="IsActive" />
+<input type="hidden" asp-for="PageNumber" />
+                                <button class="small-button" type="submit">Resend confirmation</button>
+                            </form>
+}
+                        <form method="post" asp-page-handler="@(member.IsActive ? "Deactivate" : "Activate")">
+                            <input type="hidden" name="id" value="@member.Id" />
+                            <input type="hidden" asp-for="SearchTerm" />
+<input type="hidden" asp-for="MemberType" />
+<input type="hidden" asp-for="IsActive" />
+<input type="hidden" asp-for="PageNumber" />
+                            <button class="small-button @(member.IsActive ? "danger" : "")"
+                                    type="submit"
+                                    aria-label="@(member.IsActive ? "Deactivate" : "Activate") @member.FirstName @member.LastName">
+                                @(member.IsActive ? "Deactivate" : "Activate")
+                            </button>
+                        </form>
+</div>
+</td>
+                    </tr>
+}
+                </tbody>
+</table>
+}
+        </section>
+        <div class="pagination">
+<span>@Model.Members.TotalCount member(s)</span>
+<div class="pagination-links">
+            @if (hasPrevious){
+<a class="button secondary" asp-route-SearchTerm="@Model.SearchTerm" asp-route-MemberType="@Model.MemberType" asp-route-IsActive="@Model.IsActive" asp-route-PageNumber="@(Model.Members.PageNumber - 1)">Previous</a>
+}
+@if (hasNext){
+<a class="button secondary" asp-route-SearchTerm="@Model.SearchTerm" asp-route-MemberType="@Model.MemberType" asp-route-IsActive="@Model.IsActive" asp-route-PageNumber="@(Model.Members.PageNumber + 1)">Next</a>
+}
+        </div>
+</div>
+    </main>
+</body>
+</html>

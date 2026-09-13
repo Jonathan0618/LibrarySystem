@@ -1,0 +1,167 @@
+@page
+@model LibrarySystem.Pages.Dashboards.StudentDashboardModel
+@{
+    Layout = null;
+    ViewData["ActiveStudentNavigation"] = "Dashboard";
+    ViewData["Title"] = "My Library";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>@ViewData["Title"] | School Library</title>
+<link rel="stylesheet" href="~/css/student-dashboard.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/student-shell.css" asp-append-version="true" />
+</head>
+<body>
+<partial name="_StudentHeader" />
+
+<main class="dashboard">
+    @if (TempData["StatusMessage"] is string statusMessage){
+<div class="panel" role="status">@statusMessage</div>
+}
+@if (TempData["ErrorMessage"] is string errorMessage){
+<div class="panel" role="alert">@errorMessage</div>
+}
+    <div class="dashboard-intro">
+        <h1>Welcome back, @Model.Dashboard.StudentName</h1>
+        <p>
+            @if (Model.Dashboard.ActiveLoans.Count(item => item.DueAtUtc <= DateTime.UtcNow.AddDays(7)) > 0){
+<text>You have @Model.Dashboard.ActiveLoans.Count books checked out, and @Model.Dashboard.ActiveLoans.Count(item => item.DueAtUtc <= DateTime.UtcNow.AddDays(7)) due this week.</text>
+}
+            else
+            {
+                <text>You have @Model.Dashboard.ActiveLoans.Count books checked out.</text>
+}
+        </p>
+    </div>
+
+    <div class="stat-row">
+        <div class="stat-card">
+            <div class="value">@Model.Dashboard.ActiveLoans.Count</div>
+            <div class="label">Currently borrowed</div>
+        </div>
+        <div class="stat-card">
+            <div class="value">@Model.Dashboard.Reservations.Count</div>
+            <div class="label">Active holds</div>
+        </div>
+        <div class="stat-card">
+            <div class="value">@Model.Dashboard.BooksReadThisYear</div>
+            <div class="label">Books read this year</div>
+        </div>
+        <div class="stat-card">
+<div class="value">@CurrencyFormatter.Format(Model.Dashboard.OutstandingFineBalance)</div>
+            <div class="label">Outstanding fines</div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="main-col">
+            <section class="panel">
+                <div class="panel-header">
+                    <h2>Currently borrowed</h2>
+                    <a asp-page="/Dashboards/MyBooks">View all</a>
+                </div>
+@if (Model.Dashboard.ActiveLoans.Count == 0){
+<p class="empty-state">No books currently checked out.</p>
+}
+                else
+                {
+                    <ul>
+                        @foreach (var book in Model.Dashboard.ActiveLoans){
+<li class="book-row">
+                                <div class="cover-swatch sage">@book.BookTitle[..1].ToUpperInvariant()</div>
+                                <div class="book-info">
+                                    <div class="title">@book.BookTitle</div>
+                                    <div class="author">@book.Barcode · Renewal @book.RenewalCount</div>
+                                </div>
+                                <div class="due-badge">Due @book.DueAtUtc.ToLocalTime().ToString("d")</div>
+                                <form method="post" asp-page-handler="Renew" asp-route-loanId="@book.Id">
+                                    <input type="hidden" name="rowVersion" value="@Convert.ToBase64String(book.RowVersion)" />
+                                    <button class="renew-button" type="submit">Renew</button>
+                                </form>
+                            </li>
+}
+                    </ul>
+}
+            </section>
+
+            <section class="panel">
+                <div class="panel-header">
+<h2>Fines and obligations</h2>
+</div>
+@if (Model.Dashboard.Fines.Count == 0){
+<p class="empty-state">You have no outstanding fines.</p>
+}
+                else
+                {
+                    @if (Model.Dashboard.CheckoutBlocked){
+<p class="obligation-warning" role="alert">New checkouts are blocked because your balance exceeds @CurrencyFormatter.Format(Model.Dashboard.CheckoutBalanceLimit). Contact library staff.</p>
+}
+                    <ul class="obligation-list">
+                        @foreach (var fine in Model.Dashboard.Fines){
+<li>
+<span>
+<strong>@fine.Type</strong>
+<small>@fine.Reason</small>
+</span>
+<strong>@CurrencyFormatter.Format(fine.Balance)</strong>
+</li>
+}
+                    </ul>
+}
+            </section>
+
+        </div>
+
+        <aside class="side-col">
+            @if (Model.Dashboard.ActiveLoans.OrderBy(item => item.DueAtUtc).FirstOrDefault() is { } nextDue){
+<div class="due-slip">
+                    <div class="eyebrow-label">Next due date</div>
+                    <div class="headline">@nextDue.BookTitle</div>
+                    <p class="detail">Due @nextDue.DueAtUtc.ToLocalTime().ToString("D")</p>
+                </div>
+}
+
+            <section class="panel activity-feed">
+                <div class="panel-header">
+<h2>Recent activity</h2>
+</div>
+@if (Model.Dashboard.Activity.Count == 0){
+<p class="empty-state">No recent reminders or alerts.</p>
+}
+                else
+                {
+                    <ul>
+                        @foreach (var activity in Model.Dashboard.Activity){
+<li>
+<strong>@activity.Subject</strong>
+<span>@activity.Type · @activity.OccurredAtUtc.ToLocalTime().ToString("g")</span>
+</li>
+}
+                    </ul>
+}
+            </section>
+
+            <section class="panel quick-links">
+                <h2>Quick links</h2>
+                <ul>
+                    <li>
+<a asp-page="/Dashboards/MyHolds">My holds</a>
+</li>
+                    <li>
+<a asp-page="/Dashboards/ReadingHistory">Reading history</a>
+</li>
+                    <li>
+<a asp-page="/Dashboards/Account">Account settings</a>
+</li>
+                </ul>
+            </section>
+        </aside>
+    </div>
+</main>
+</body>
+</html>

@@ -40,6 +40,19 @@ public interface ICatalogService
         CreateBookCopyRequest request,
         CancellationToken cancellationToken = default);
 
+    Task<BookCopyDto?> GetCopyAsync(long copyId, CancellationToken cancellationToken = default);
+
+    Task<BookCopyDto?> UpdateCopyAsync(
+        long copyId,
+        UpdateBookCopyRequest request,
+        CancellationToken cancellationToken = default);
+
+    Task<bool> SetCopyStatusAsync(
+        long copyId,
+        LibrarySystem.Domain.Catalog.BookCopyStatus status,
+        byte[] rowVersion,
+        CancellationToken cancellationToken = default);
+
     Task<bool> WithdrawCopyAsync(
         long copyId,
         byte[] rowVersion,

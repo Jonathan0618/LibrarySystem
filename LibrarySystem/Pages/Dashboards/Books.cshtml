@@ -1,0 +1,200 @@
+@page "/Dashboards/Books"
+@model LibrarySystem.Pages.Dashboards.BooksModel
+@{
+    Layout = null;
+    ViewData["ActiveNavigation"] = "Catalog";
+    var isEditing = Model.Input.Id > 0;
+    var hasPreviousPage = Model.Books.PageNumber > 1;
+    var hasNextPage = Model.Books.PageNumber * Model.Books.PageSize < Model.Books.TotalCount;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Manage Books | School Library</title>
+    <link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true" />
+</head>
+<body>
+    <partial name="_DashboardHeader" />
+
+    <main class="page">
+        <div class="page-heading">
+            <div>
+                <h1>Manage books</h1>
+                <p class="subheading">Add catalog titles, update their details, or remove them from the active catalog.</p>
+            </div>
+            <div class="row-actions">
+<a class="button secondary" asp-page="/Dashboards/CatalogReferences">Reference data</a>
+<a class="button secondary" asp-page="/Dashboards/Catalog">View catalog</a>
+</div>
+        </div>
+@if (TempData["StatusMessage"] is string statusMessage){
+<div class="notice" role="status">@statusMessage</div>
+}
+@if (TempData["ErrorMessage"] is string errorMessage){
+<div class="notice error" role="alert">@errorMessage</div>
+}
+
+        <section class="form-panel book-editor">
+            <div class="section-heading">
+                <div>
+                    <h2>@(isEditing ? "Edit book" : "Add a book")</h2>
+                    <p>@(isEditing ? "Update the selected catalog record." : "Enter the bibliographic details for the new title.")</p>
+                </div>
+@if (isEditing){
+<a class="small-button" asp-page="/Dashboards/Books" asp-route-SearchTerm="@Model.SearchTerm" asp-route-PageNumber="@Model.PageNumber">Cancel edit</a>
+}
+            </div>
+
+            <form method="post" asp-page-handler="Save" class="book-form">
+                <div asp-validation-summary="ModelOnly" class="validation-errors form-wide">
+</div>
+                <input asp-for="Input.Id" type="hidden" />
+                <input asp-for="Input.RowVersion" type="hidden" />
+                <input asp-for="SearchTerm" type="hidden" />
+                <input asp-for="PageNumber" type="hidden" />
+
+                <div class="field form-wide">
+                    <label asp-for="Input.Title">
+</label>
+                    <input asp-for="Input.Title" />
+                    <span asp-validation-for="Input.Title" class="validation-errors">
+</span>
+                </div>
+                <div class="field">
+                    <label asp-for="Input.Isbn">
+</label>
+                    <input asp-for="Input.Isbn" />
+                    <span asp-validation-for="Input.Isbn" class="validation-errors">
+</span>
+                </div>
+                <div class="field">
+                    <label asp-for="Input.Edition">
+</label>
+                    <input asp-for="Input.Edition" />
+                    <span asp-validation-for="Input.Edition" class="validation-errors">
+</span>
+                </div>
+                <div class="field">
+                    <label asp-for="Input.PublicationYear">
+</label>
+                    <input asp-for="Input.PublicationYear" type="number" />
+                    <span asp-validation-for="Input.PublicationYear" class="validation-errors">
+</span>
+                </div>
+                <div class="field">
+                    <label asp-for="Input.PublisherId">
+</label>
+                    <select asp-for="Input.PublisherId">
+                        <option value="">No publisher selected</option>
+                        @foreach (var publisher in Model.Publishers){
+<option value="@publisher.Id">@publisher.Name</option>
+}
+                    </select>
+                </div>
+                <div class="field">
+                    <label asp-for="Input.AuthorIds">
+</label>
+                    <select asp-for="Input.AuthorIds" multiple size="5">
+                        @foreach (var author in Model.Authors){
+<option value="@author.Id">@author.Name</option>
+}
+                    </select>
+                    <span class="field-hint">Hold Ctrl to select more than one.</span>
+                </div>
+                <div class="field">
+                    <label asp-for="Input.CategoryIds">
+</label>
+                    <select asp-for="Input.CategoryIds" multiple size="5">
+                        @foreach (var category in Model.Categories){
+<option value="@category.Id">@category.Name</option>
+}
+                    </select>
+                    <span class="field-hint">Hold Ctrl to select more than one.</span>
+                </div>
+                <div class="field form-wide">
+                    <label asp-for="Input.Description">
+</label>
+                    <textarea asp-for="Input.Description" rows="4">
+</textarea>
+                    <span asp-validation-for="Input.Description" class="validation-errors">
+</span>
+                </div>
+                <div class="form-actions form-wide">
+                    <button class="button" type="submit">@(isEditing ? "Save changes" : "Add book")</button>
+                </div>
+            </form>
+        </section>
+
+        <form class="filters book-search" method="get">
+            <input asp-for="SearchTerm" type="search" placeholder="Search title, ISBN, author, or barcode" />
+            <button class="button" type="submit">Search</button>
+        </form>
+
+        <section class="data-panel" aria-label="Book-management results">
+            @if (Model.Books.Items.Count == 0){
+<div class="empty">No active books match the search.</div>
+}
+            else
+            {
+                <table>
+                    <thead>
+<tr>
+<th>Title</th>
+<th>ISBN</th>
+<th>Authors</th>
+<th>Copies</th>
+<th>Actions</th>
+</tr>
+</thead>
+                    <tbody>
+                        @foreach (var book in Model.Books.Items){
+<tr>
+                                <td>
+<span class="primary">@book.Title</span>
+<span class="secondary-text">@(book.Publisher ?? "Publisher not specified")</span>
+</td>
+                                <td>@(book.Isbn ?? "—")</td>
+                                <td>@(book.Authors.Count == 0 ? "—" : string.Join(", ", book.Authors))</td>
+                                <td>
+<span class="primary">@book.AvailableCopies available</span>
+<span class="secondary-text">@book.TotalCopies total</span>
+</td>
+                                <td>
+                                    <div class="row-actions">
+                                        <a class="small-button" asp-page="/Dashboards/BookDetails" asp-route-id="@book.Id">Details/copies</a>
+                                        <a class="small-button" asp-route-EditId="@book.Id" asp-route-SearchTerm="@Model.SearchTerm" asp-route-PageNumber="@Model.PageNumber">Edit</a>
+                                        <form method="post" asp-page-handler="Delete" data-confirm="Remove this book from the active catalog?">
+                                            <input type="hidden" name="id" value="@book.Id" />
+                                            <input type="hidden" name="rowVersion" value="@Convert.ToBase64String(book.RowVersion)" />
+                                            <input asp-for="SearchTerm" type="hidden" />
+                                            <input asp-for="PageNumber" type="hidden" />
+                                            <button class="small-button danger" type="submit">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+}
+                    </tbody>
+                </table>
+}
+        </section>
+
+        <div class="pagination">
+            <span>@Model.Books.TotalCount active book(s)</span>
+            <div class="pagination-links">
+                @if (hasPreviousPage){
+<a class="button secondary" asp-route-SearchTerm="@Model.SearchTerm" asp-route-PageNumber="@(Model.Books.PageNumber - 1)">Previous</a>
+}
+@if (hasNextPage){
+<a class="button secondary" asp-route-SearchTerm="@Model.SearchTerm" asp-route-PageNumber="@(Model.Books.PageNumber + 1)">Next</a>
+}
+            </div>
+        </div>
+    </main>
+
+    <partial name="_ValidationScriptsPartial" />
+<script src="~/js/security-ui.js" asp-append-version="true"></script>
+</body>
+</html>

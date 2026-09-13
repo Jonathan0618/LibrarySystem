@@ -1,0 +1,81 @@
+@page
+@model LibrarySystem.Pages.Dashboards.AccountModel
+@{
+    Layout = null;
+    ViewData["ActiveStudentNavigation"] = "Account";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Account | School Library</title>
+<link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/student-shell.css" asp-append-version="true" />
+</head>
+<body>
+<partial name="_StudentHeader" />
+<main class="page">
+<div class="page-heading">
+<div>
+<h1>Account</h1>
+<p class="subheading">Manage your contact email and password. Membership details remain staff-controlled.</p>
+</div>
+</div>
+@if (TempData["StatusMessage"] is string status){
+<div class="notice" role="status">@status</div>
+}
+<section class="form-panel">
+<h2>Membership details</h2>
+<table>
+<tbody>
+<tr>
+<th>Name</th>
+<td>@Model.Dashboard.StudentName</td>
+</tr>
+<tr>
+<th>Current email</th>
+<td>@User.Identity?.Name</td>
+</tr>
+<tr>
+<th>Member number</th>
+<td>@Model.Dashboard.MemberNumber</td>
+</tr>
+<tr>
+<th>Grade</th>
+<td>@(Model.Dashboard.Grade ?? "Not assigned")</td>
+</tr>
+<tr>
+<th>Outstanding fines</th>
+<td>@CurrencyFormatter.Format(Model.Dashboard.OutstandingFineBalance)</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="form-panel">
+<h2>Update contact email</h2>
+<p class="secondary-text">The new address becomes your sign-in email only after you confirm the link sent to it.</p>
+<form class="book-form" method="post" asp-page-handler="ChangeEmail">
+<div asp-validation-summary="ModelOnly" class="validation-errors form-wide">
+</div>
+<div class="field form-wide">
+<label asp-for="Input.NewEmail">
+</label>
+<input asp-for="Input.NewEmail" type="email" autocomplete="email" />
+<span asp-validation-for="Input.NewEmail" class="validation-errors">
+</span>
+</div>
+<div class="form-actions form-wide">
+<button class="button" type="submit">Send confirmation</button>
+</div>
+</form>
+</section>
+<section class="form-panel">
+<h2>Password</h2>
+<div class="form-actions account-form-actions">
+<a class="button" asp-area="Identity" asp-page="/Account/ChangePassword">Change password</a>
+</div>
+</section>
+</main>
+</body>
+</html>

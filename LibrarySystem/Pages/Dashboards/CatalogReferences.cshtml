@@ -1,0 +1,104 @@
+@page "/Dashboards/Catalog/References"
+@model LibrarySystem.Pages.Dashboards.CatalogReferencesModel
+@{Layout=null;ViewData["ActiveNavigation"]="Catalog";}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Catalog references | School Library</title>
+<link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true"/>
+</head>
+<body>
+<partial name="_DashboardHeader"/>
+<main class="page">
+<div class="page-heading">
+<div>
+<h1>Catalog reference data</h1>
+<p class="subheading">Maintain authors, categories, publishers, and shelf locations without deleting historical links.</p>
+</div>
+<a class="button secondary" asp-page="/Dashboards/Books">Manage books</a>
+</div>
+@if(TempData["StatusMessage"] is string message){
+<div class="notice" role="status">@message</div>
+}
+@if(TempData["ErrorMessage"] is string error){
+<div class="notice error" role="alert">@error</div>
+}
+<section class="form-panel">
+<h2>Add or edit a reference</h2>
+<form method="post" asp-page-handler="Save" class="book-form">
+<div asp-validation-summary="ModelOnly" class="validation-errors form-wide">
+</div>
+<input type="hidden" asp-for="Input.Id"/>
+<div class="field">
+<label asp-for="Input.Type">
+</label>
+<select asp-for="Input.Type">
+<option value="author">Author</option>
+<option value="category">Category</option>
+<option value="publisher">Publisher</option>
+<option value="shelf">Shelf/location</option>
+</select>
+</div>
+<div class="field">
+<label asp-for="Input.Name">Name or shelf code</label>
+<input asp-for="Input.Name"/>
+<span asp-validation-for="Input.Name" class="validation-errors">
+</span>
+</div>
+<div class="field form-wide">
+<label asp-for="Input.Description">Shelf description (optional)</label>
+<input asp-for="Input.Description"/>
+</div>
+<div class="form-actions form-wide">
+<button class="button" type="submit">Save reference</button>
+</div>
+</form>
+</section>
+@foreach(var group in new[]{("Authors","author",Model.Authors),("Categories","category",Model.Categories),("Publishers","publisher",Model.Publishers),("Shelves / locations","shelf",Model.Shelves)}){
+<section class="data-panel">
+<div class="section-title">
+<h2>@group.Item1</h2>
+</div>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Used by</th>
+<th>Status</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody>@foreach(var item in group.Item3){
+<tr>
+<td class="primary">@item.Name</td>
+<td>@(item.Description??"—")</td>
+<td>@item.UsageCount record(s)</td>
+<td>
+<span class="badge @(item.IsActive?"":"archived")">@(item.IsActive?"Active":"Archived")</span>
+</td>
+<td>
+<div class="row-actions">
+<button class="small-button reference-edit" type="button" data-id="@item.Id" data-type="@group.Item2" data-name="@item.Name" data-description="@item.Description">Edit</button>
+<form method="post" asp-page-handler="Active" data-confirm="This keeps existing book links and changes whether the value can be selected. Continue?">
+<input type="hidden" name="type" value="@group.Item2"/>
+<input type="hidden" name="id" value="@item.Id"/>
+<input type="hidden" name="active" value="@(!item.IsActive)"/>
+<button class="small-button @(item.IsActive?"danger":"")" type="submit">@(item.IsActive?"Archive":"Restore")</button>
+</form>
+</div>
+</td>
+</tr>
+}</tbody>
+</table>
+</section>
+}
+</main>
+<partial name="_ValidationScriptsPartial"/>
+<script src="~/js/catalog-references.js" asp-append-version="true">
+</script>
+<script src="~/js/security-ui.js" asp-append-version="true"></script>
+</body>
+</html>

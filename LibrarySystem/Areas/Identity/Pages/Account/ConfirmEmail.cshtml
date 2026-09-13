@@ -1,0 +1,25 @@
+@page
+@model LibrarySystem.Areas.Identity.Pages.Account.ConfirmEmailModel
+@{
+    Layout = "/Areas/Identity/Pages/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Confirm email";
+}
+
+<section aria-labelledby="page-title">
+    <h1 id="page-title">Email confirmation</h1>
+    <p class="lead">@Model.Message</p>
+
+    <div class="status-panel @(Model.Succeeded ? "success" : "error")"
+         role="@(Model.Succeeded ? "status" : "alert")">
+        @(Model.Succeeded
+                ? "Your account is confirmed and ready for sign in."
+                : "Request a new confirmation link or contact library staff.")
+    </div>
+
+    <nav class="identity-links" aria-label="What to do next">
+        <a asp-page="./Login">Sign in</a>
+        @if (!Model.Succeeded){
+<a asp-page="./ResendEmailConfirmation">Resend confirmation</a>
+}
+    </nav>
+</section>

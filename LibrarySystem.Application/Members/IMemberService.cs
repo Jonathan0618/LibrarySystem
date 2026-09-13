@@ -12,6 +12,10 @@ public interface IMemberService
         long id,
         CancellationToken cancellationToken = default);
 
+    Task<MemberDetailsDto?> GetDetailsAsync(
+        long id,
+        CancellationToken cancellationToken = default);
+
     Task<PagedResult<MemberDto>> SearchAsync(
         MemberSearchRequest request,
         CancellationToken cancellationToken = default);

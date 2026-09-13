@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using LibrarySystem.Application.Common;
 using LibrarySystem.Domain.Members;
 
 namespace LibrarySystem.Application.Members;
@@ -6,7 +7,7 @@ namespace LibrarySystem.Application.Members;
 public sealed class CreateMemberRequest
 {
     [Required]
-    [EmailAddress]
+    [EmailAddress, SchoolEmailAddress]
     [MaxLength(256)]
     public required string Email { get; init; }
 

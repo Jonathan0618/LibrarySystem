@@ -1,0 +1,190 @@
+@page "/Dashboards/Books/{id:long}"
+@model LibrarySystem.Pages.Dashboards.BookDetailsModel
+@using LibrarySystem.Domain.Catalog
+@{ Layout = null; ViewData["ActiveNavigation"] = "Catalog"; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>@Model.Book.Title | School Library</title>
+<link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true" />
+</head>
+<body>
+<partial name="_DashboardHeader" />
+<main class="page">
+<div class="page-heading">
+<div>
+<h1>@Model.Book.Title</h1>
+<p class="subheading">Catalog record and independently tracked physical copies.</p>
+</div>
+<div class="row-actions">
+<a class="button secondary" asp-page="/Dashboards/Catalog">Catalog</a>
+<a class="button" asp-page="/Dashboards/Books" asp-route-EditId="@Model.Book.Id">Edit title</a>
+</div>
+</div>
+@if (TempData["StatusMessage"] is string message){
+<div class="notice" role="status">@message</div>
+}
+@if (TempData["ErrorMessage"] is string error){
+<div class="notice error" role="alert">@error</div>
+}
+<section class="detail-grid">
+ <article class="form-panel cover-panel">
+  @if (Model.Book.CoverImagePath is null){
+<div class="cover-placeholder" aria-label="No cover image">No cover</div>
+} else { <img class="book-cover" src="@Model.Book.CoverImagePath" alt="Cover of @Model.Book.Title" />
+}
+  <form method="post" enctype="multipart/form-data" asp-page-handler="Cover" class="stack-form">
+   <input type="hidden" asp-for="Id" />
+<input type="hidden" asp-for="BookRowVersion" />
+   <label asp-for="Cover">Replace cover (JPEG, PNG, WebP; 5 MB maximum)</label>
+<input asp-for="Cover" accept="image/jpeg,image/png,image/webp" />
+<button class="small-button" type="submit">Upload cover</button>
+  </form>
+ </article>
+ <article class="form-panel">
+<h2>Bibliographic details</h2>
+<dl class="details-list">
+  <dt>ISBN</dt>
+<dd>@(Model.Book.Isbn ?? "Not specified")</dd>
+<dt>Authors</dt>
+<dd>@(Model.Book.Authors.Count == 0 ? "Not specified" : string.Join(", ", Model.Book.Authors))</dd>
+  <dt>Categories</dt>
+<dd>@(Model.Book.Categories.Count == 0 ? "Not specified" : string.Join(", ", Model.Book.Categories))</dd>
+<dt>Publisher</dt>
+<dd>@(Model.Book.Publisher ?? "Not specified")</dd>
+  <dt>Edition/year</dt>
+<dd>@(Model.Book.Edition ?? "—") · @(Model.Book.PublicationYear?.ToString() ?? "—")</dd>
+<dt>Description</dt>
+<dd>@(Model.Book.Description ?? "No description")</dd>
+ </dl>
+</article>
+</section>
+<section class="summary-grid copy-summary">
+<article>
+<span>Available</span>
+<strong>@Model.Book.AvailableCopies</strong>
+</article>
+<article>
+<span>On loan</span>
+<strong>@Model.Book.OnLoanCopies</strong>
+</article>
+<article>
+<span>Reserved</span>
+<strong>@Model.Book.ReservedCopies</strong>
+</article>
+<article>
+<span>Lost</span>
+<strong>@Model.Book.LostCopies</strong>
+</article>
+<article>
+<span>Damaged</span>
+<strong>@Model.Book.DamagedCopies</strong>
+</article>
+<article>
+<span>Withdrawn</span>
+<strong>@Model.Book.WithdrawnCopies</strong>
+</article>
+</section>
+<section class="form-panel">
+<h2>Add physical copy</h2>
+<form method="post" asp-page-handler="AddCopy" class="book-form">
+<div asp-validation-summary="ModelOnly" class="validation-errors form-wide">
+</div>
+<input type="hidden" asp-for="Id" />
+ <div class="field">
+<label asp-for="Copy.Barcode">
+</label>
+<div class="inline-field">
+<input asp-for="Copy.Barcode" autocomplete="off" />
+<button class="small-button" id="generate-barcode" type="button">Generate</button>
+</div>
+<span asp-validation-for="Copy.Barcode" class="validation-errors">
+</span>
+</div>
+ <div class="field">
+<label asp-for="Copy.ShelfLocationId">
+</label>
+<select asp-for="Copy.ShelfLocationId">
+<option value="">Unassigned</option>@foreach(var shelf in Model.Shelves){
+<option value="@shelf.Id">@shelf.Name @(shelf.Description is null ? "" : $"— {shelf.Description}")</option>
+}</select>
+</div>
+ <div class="field">
+<label asp-for="Copy.Condition">
+</label>
+<select asp-for="Copy.Condition" asp-items="Html.GetEnumSelectList<BookCondition>()">
+</select>
+</div>
+<div class="field">
+<label asp-for="Copy.AcquisitionDate">
+</label>
+<input asp-for="Copy.AcquisitionDate" type="date" />
+</div>
+ <div class="field">
+<label asp-for="Copy.AcquisitionPrice">
+</label>
+<input asp-for="Copy.AcquisitionPrice" />
+</div>
+<div class="form-actions">
+<button class="button" type="submit">Add copy</button>
+</div>
+</form>
+</section>
+<section class="data-panel">
+<table>
+<thead>
+<tr>
+<th>Barcode</th>
+<th>Location</th>
+<th>Condition</th>
+<th>Status</th>
+<th>Acquired</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody>
+@if(Model.Book.Copies.Count == 0){
+<tr>
+<td colspan="6" class="empty">No physical copies have been added.</td>
+</tr>
+}else{@foreach(var copy in Model.Book.Copies){
+<tr>
+<td class="primary">@copy.Barcode</td>
+<td>@(copy.ShelfCode ?? "Unassigned")</td>
+<td>@copy.Condition</td>
+<td>
+<span class="badge @copy.Status.ToString().ToLowerInvariant()">@copy.Status</span>
+</td>
+<td>@(copy.AcquisitionDate?.ToString("d") ?? "—")</td>
+<td>
+<div class="row-actions">
+<a class="small-button" asp-page="/Dashboards/BookCopy" asp-route-id="@copy.Id">Edit/history</a>
+@if(copy.Status is not BookCopyStatus.OnLoan and not BookCopyStatus.Reserved){
+<form method="post" asp-page-handler="Status" data-confirm="Change this copy status? Withdrawal requires a reason and preserves all history.">
+<input type="hidden" name="Id" value="@Model.Id"/>
+<input type="hidden" name="copyId" value="@copy.Id"/>
+<input type="hidden" name="rowVersion" value="@Convert.ToBase64String(copy.RowVersion)"/>
+<select name="status" aria-label="New status">
+<option value="Available">Available</option>
+<option value="Lost">Lost</option>
+<option value="Damaged">Damaged</option>
+<option value="Withdrawn">Withdrawn</option>
+</select>
+<input name="reason" maxlength="500" placeholder="Withdrawal reason" aria-label="Withdrawal reason"/>
+<button class="small-button" type="submit">Apply</button>
+</form>
+}</div>
+</td>
+</tr>
+}}</tbody>
+</table>
+</section>
+</main>
+<partial name="_ValidationScriptsPartial" />
+<script src="~/js/book-details.js" asp-append-version="true">
+</script>
+<script src="~/js/security-ui.js" asp-append-version="true"></script>
+</body>
+</html>

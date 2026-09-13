@@ -12,6 +12,8 @@ public sealed class BookCopyDto
 
     public string? ShelfCode { get; init; }
 
+    public int? ShelfLocationId { get; init; }
+
     public BookCopyStatus Status { get; init; }
 
     public BookCondition Condition { get; init; }
@@ -21,4 +23,6 @@ public sealed class BookCopyDto
     public decimal? AcquisitionPrice { get; init; }
 
     public required byte[] RowVersion { get; init; }
+
+    public required IReadOnlyCollection<BookCopyHistoryDto> History { get; init; }
 }

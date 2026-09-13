@@ -1,0 +1,32 @@
+@page
+@model LibrarySystem.Areas.Identity.Pages.Account.AccessDeniedModel
+@{
+    Layout = "/Areas/Identity/Pages/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Access denied";
+}
+
+<section aria-labelledby="page-title">
+    <h1 id="page-title">Access denied</h1>
+    <p class="lead">
+        You're signed in, but your account doesn't have permission to perform that action.
+    </p>
+
+    <div class="status-panel error" role="alert">
+        <p>
+            If you believe you should have access, contact an administrator and share the correlation
+            ID below so they can look up what happened.
+        </p>
+        <p class="help-copy">
+            Do not include your password or another member's private information in that request.
+        </p>
+    </div>
+
+    <p class="help-copy">
+        Correlation ID: <code id="correlation-id">@Model.CorrelationId</code>
+    </p>
+
+    <nav class="identity-links" aria-label="What to do next">
+        <a asp-area="" asp-page="/Index">Return home</a>
+        <a asp-area="Identity" asp-page="/Account/Login">Sign in with a different account</a>
+    </nav>
+</section>

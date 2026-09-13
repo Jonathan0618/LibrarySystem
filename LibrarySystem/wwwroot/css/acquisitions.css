@@ -1,0 +1,29 @@
+.budget-form,.receive-form {
+    display:flex;
+    gap:.35rem;
+    flex-wrap:wrap
+}
+
+.budget-form input,.receive-form input,.receive-form select,.stack-form input,.stack-form select {
+    padding:.55rem;
+    border:1px solid #cfc3a5;
+    border-radius:4px;
+    background:#fffdf8
+}
+
+.budget-form input {
+    width:100%
+}
+
+.receive-form {
+    min-width:310px;
+    margin-bottom:.4rem
+}
+
+.receive-form input {
+    width:130px
+}
+
+.receive-form select {
+    width:120px
+}

@@ -1,0 +1,91 @@
+@page
+@model LibrarySystem.Pages.Dashboards.StudentCatalogModel
+@{
+    Layout = null;
+    ViewData["ActiveStudentNavigation"] = "Catalog";
+    var previous = Model.Books.PageNumber > 1;
+    var next = Model.Books.PageNumber * Model.Books.PageSize < Model.Books.TotalCount;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Catalog | School Library</title>
+<link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/student-catalog.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/student-shell.css" asp-append-version="true" />
+</head>
+<body>
+<partial name="_StudentHeader" />
+<main class="page">
+    <div class="page-heading">
+<div>
+<h1>Library catalog</h1>
+<p class="subheading">Search available titles or place a hold when every copy is checked out.</p>
+</div>
+</div>
+    <form class="filters book-search" method="get">
+<input asp-for="SearchTerm" type="search" placeholder="Title, author, ISBN, or category" />
+<button class="button" type="submit">Search</button>
+</form>
+@if (TempData["StatusMessage"] is string status){
+<div class="notice" role="status">@status</div>
+}
+@if (TempData["ErrorMessage"] is string error){
+<div class="notice error" role="alert">@error</div>
+}
+    <section class="data-panel">
+<table>
+<thead>
+<tr>
+<th>Title</th>
+<th>Author</th>
+<th>Category</th>
+<th>Availability</th>
+<th>
+</th>
+</tr>
+</thead>
+<tbody>
+    @foreach (var book in Model.Books.Items){
+<tr>
+<td>
+<span class="primary">@book.Title</span>
+<span class="secondary-text">@(book.Isbn ?? "No ISBN") · @(book.Publisher ?? "Publisher not specified")</span>
+</td>
+<td>@string.Join(", ", book.Authors)</td>
+<td>@string.Join(", ", book.Categories)</td>
+<td>
+<span class="badge @(book.AvailableCopies == 0 ? "inactive" : "")">@book.AvailableCopies of @book.TotalCopies available</span>
+<span class="secondary-text">@(book.Copies.Where(c => c.Status == LibrarySystem.Domain.Catalog.BookCopyStatus.Available).Select(c => c.ShelfCode).FirstOrDefault(s => s is not null) ?? "Ask staff for location")</span>
+</td>
+<td>
+<div class="catalog-actions">
+        @if (book.AvailableCopies == 0 && book.TotalCopies > 0){
+<form method="post" asp-page-handler="PlaceHold">
+<input type="hidden" name="bookId" value="@book.Id" />
+<input type="hidden" asp-for="SearchTerm" />
+<input type="hidden" asp-for="PageNumber" />
+<button class="small-button" type="submit">Place hold</button>
+</form>
+}
+        </div>
+</td>
+</tr>
+}
+    </tbody>
+</table>
+</section>
+    <div class="pagination">
+<span>@Model.Books.TotalCount title(s)</span>
+<div class="pagination-links">@if(previous){
+<a class="button secondary" asp-route-SearchTerm="@Model.SearchTerm" asp-route-PageNumber="@(Model.Books.PageNumber-1)">Previous</a>
+}
+@if(next){
+<a class="button secondary" asp-route-SearchTerm="@Model.SearchTerm" asp-route-PageNumber="@(Model.Books.PageNumber+1)">Next</a>
+}</div>
+</div>
+</main>
+</body>
+</html>

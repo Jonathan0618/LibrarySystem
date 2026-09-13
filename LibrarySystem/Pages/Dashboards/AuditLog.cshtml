@@ -1,0 +1,90 @@
+@page "/Dashboards/AuditLog"
+@model LibrarySystem.Pages.Dashboards.AuditLogModel
+@{
+    Layout = null;
+    ViewData["ActiveNavigation"] = "Audit";
+    var hasPrevious = Model.Results.PageNumber > 1;
+    var hasNext = Model.Results.PageNumber * Model.Results.PageSize < Model.Results.TotalCount;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Audit Log | School Library</title>
+    <link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true" />
+</head>
+<body>
+    <partial name="_DashboardHeader" />
+    <main class="page">
+        <div class="page-heading">
+            <div>
+                <h1>Audit log</h1>
+                <p class="subheading">Review security-sensitive and business-critical activity.</p>
+            </div>
+        </div>
+
+        <form class="filters audit-filters" method="get">
+            <input asp-for="SearchTerm" type="search" placeholder="Actor, action, target, or details" aria-label="Search audit log" />
+            <label>From<input asp-for="FromDate" type="date" />
+</label>
+            <label>To<input asp-for="ToDate" type="date" />
+</label>
+            <button class="button" type="submit">Apply</button>
+        </form>
+        <div asp-validation-summary="ModelOnly" class="notice error">
+</div>
+
+        <section class="data-panel" aria-label="Audit log results">
+            @if (Model.Results.Items.Count == 0){
+<div class="empty">No audit entries match the selected filters.</div>
+}
+            else
+            {
+                <table>
+                    <thead>
+<tr>
+<th>Date</th>
+<th>Actor</th>
+<th>Action</th>
+<th>Target</th>
+<th>Details</th>
+</tr>
+</thead>
+                    <tbody>
+                    @foreach (var entry in Model.Results.Items){
+<tr>
+                            <td>@entry.CreatedAtUtc.ToLocalTime().ToString("g")</td>
+                            <td>
+<span class="primary">@entry.ActorName</span>
+<span class="secondary-text">@(entry.ActorUserId ?? "Background process")</span>
+</td>
+                            <td>
+<span class="badge">@entry.Action</span>
+</td>
+                            <td>
+<span class="primary">@entry.TargetType</span>
+<span class="secondary-text">@entry.TargetId</span>
+</td>
+                            <td>@(entry.Details ?? "—")</td>
+                        </tr>
+}
+                    </tbody>
+                </table>
+}
+        </section>
+
+        <div class="pagination">
+            <span>@Model.Results.TotalCount audit entry/entries</span>
+            <div class="pagination-links">
+                @if (hasPrevious){
+<a class="button secondary" asp-route-SearchTerm="@Model.SearchTerm" asp-route-FromDate="@Model.FromDate?.ToString("yyyy-MM-dd")" asp-route-ToDate="@Model.ToDate?.ToString("yyyy-MM-dd")" asp-route-PageNumber="@(Model.Results.PageNumber - 1)">Previous</a>
+}
+@if (hasNext){
+<a class="button secondary" asp-route-SearchTerm="@Model.SearchTerm" asp-route-FromDate="@Model.FromDate?.ToString("yyyy-MM-dd")" asp-route-ToDate="@Model.ToDate?.ToString("yyyy-MM-dd")" asp-route-PageNumber="@(Model.Results.PageNumber + 1)">Next</a>
+}
+            </div>
+        </div>
+    </main>
+</body>
+</html>

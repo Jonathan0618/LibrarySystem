@@ -1,0 +1,73 @@
+@page "{id:long}"
+@using LibrarySystem.Domain.Members
+@model LibrarySystem.Pages.Dashboards.EditMemberModel
+@{ Layout = null; ViewData["ActiveNavigation"] = "Members"; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Edit member | School Library</title>
+<link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true"/>
+</head>
+<body>
+<partial name="_DashboardHeader"/>
+<main class="page">
+<div class="page-heading">
+<div>
+<h1>Edit member</h1>
+<p class="subheading">Member number @Model.Member.MemberNumber is permanent and system-issued.</p>
+</div>
+<a class="button secondary" asp-page="./MemberDetails" asp-route-id="@Model.Member.Id">Cancel</a>
+</div>
+<section class="form-panel">
+<form method="post" class="book-form">
+<div asp-validation-summary="ModelOnly" class="validation-errors form-wide" role="alert">
+</div>
+<div class="field">
+<label asp-for="Input.FirstName">
+</label>
+<input asp-for="Input.FirstName"/>
+<span asp-validation-for="Input.FirstName">
+</span>
+</div>
+<div class="field">
+<label asp-for="Input.LastName">
+</label>
+<input asp-for="Input.LastName"/>
+<span asp-validation-for="Input.LastName">
+</span>
+</div>
+<div class="field">
+<label asp-for="Input.MemberType">
+</label>
+<select asp-for="Input.MemberType" disabled="@(!Model.CanChangeRole)">@foreach(var type in Enum.GetValues<MemberType>()){
+<option value="@type">@type</option>
+}</select>@if(!Model.CanChangeRole){
+<input type="hidden" asp-for="Input.MemberType"/>
+<span class="field-hint">Only administrators can change member roles.</span>
+}<span asp-validation-for="Input.MemberType">
+</span>
+</div>
+<div class="field">
+<label asp-for="Input.Grade">
+</label>
+<input asp-for="Input.Grade" placeholder="For students"/>
+<span asp-validation-for="Input.Grade">
+</span>
+</div>
+<div class="field form-wide">
+<label asp-for="Input.Department">
+</label>
+<input asp-for="Input.Department" placeholder="For teachers or librarians"/>
+<span asp-validation-for="Input.Department">
+</span>
+</div>
+<div class="form-actions form-wide">
+<button class="button" type="submit">Save changes</button>
+</div>
+</form>
+</section>
+</main>
+</body>
+</html>

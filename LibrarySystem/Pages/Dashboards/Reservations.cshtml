@@ -1,0 +1,102 @@
+@page
+@using LibrarySystem.Domain.Reservations
+@model LibrarySystem.Pages.Dashboards.ReservationsModel
+@{ Layout=null; ViewData["ActiveNavigation"]="Reservations"; var previous=Model.Reservations.PageNumber>1; var next=Model.Reservations.PageNumber*Model.Reservations.PageSize<Model.Reservations.TotalCount; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Reservation queue | School Library</title>
+<link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true"/>
+<link rel="stylesheet" href="~/css/reservation-management.css" asp-append-version="true"/>
+</head>
+<body>
+<partial name="_DashboardHeader"/>
+<main class="page">
+<div class="page-heading">
+<div>
+<h1>Reservation queue</h1>
+<p class="subheading">Assign returned or available copies, record pickup, and manage cancellations and no-shows.</p>
+</div>
+</div>
+@if(TempData["StatusMessage"] is string message){
+<div class="notice" role="status">@message</div>
+}
+@if(TempData["ErrorMessage"] is string error){
+<div class="notice error" role="alert">@error</div>
+}
+<form method="get" class="filters reservation-filters">
+<input asp-for="SearchTerm" type="search" placeholder="Member number, title, or barcode" aria-label="Search reservations"/>
+<select asp-for="Status" asp-items="Html.GetEnumSelectList<ReservationStatus>()">
+<option value="">All statuses</option>
+</select>
+<button class="button" type="submit">Search</button>
+</form>
+<section class="data-panel">@if(Model.Reservations.Items.Count==0){
+<div class="empty">No reservations match the filters.</div>
+}else{<table>
+<thead>
+<tr>
+<th>Queue</th>
+<th>Member</th>
+<th>Title</th>
+<th>Status</th>
+<th>Copy / deadline</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody>@foreach(var item in Model.Reservations.Items){
+<tr>
+<td>@(item.Status==ReservationStatus.Waiting ? $"#{item.QueuePosition}" : "—")</td>
+<td>
+<a class="small-button" asp-page="./MemberDetails" asp-route-id="@item.MemberId">@item.MemberNumber</a>
+</td>
+<td class="primary">@item.BookTitle<span class="secondary-text">Placed @item.CreatedAtUtc.ToLocalTime().ToString("g")</span>
+</td>
+<td>
+<span class="badge @(item.Status is ReservationStatus.Cancelled or ReservationStatus.Expired ? "inactive" : "")">@item.Status</span>
+</td>
+<td>@(item.AssignedBarcode ?? "—")<span class="secondary-text">@(item.ExpiresAtUtc?.ToLocalTime().ToString("g") ?? "No pickup deadline")</span>
+</td>
+<td>
+<div class="reservation-actions">@if(item.Status==ReservationStatus.Waiting){
+<form method="post" asp-page-handler="Ready">
+<input type="hidden" name="id" value="@item.Id"/>
+<input type="hidden" name="rowVersion" value="@Convert.ToBase64String(item.RowVersion)"/>
+<input name="barcode" maxlength="100" required placeholder="Available copy barcode" aria-label="Available copy barcode"/>
+<button class="small-button" type="submit">Mark ready</button>
+</form>
+}
+@if(item.Status==ReservationStatus.ReadyForPickup){
+<form method="post" asp-page-handler="Fulfill" data-confirm="Record pickup and check out the assigned copy?">
+<input type="hidden" name="id" value="@item.Id"/>
+<input type="hidden" name="rowVersion" value="@Convert.ToBase64String(item.RowVersion)"/>
+<button class="small-button" type="submit">Record pickup</button>
+</form>
+}
+@if(item.Status is ReservationStatus.Waiting or ReservationStatus.ReadyForPickup){
+<form method="post" asp-page-handler="Cancel" data-confirm="Cancel this reservation and offer any assigned copy to the next member?">
+<input type="hidden" name="id" value="@item.Id"/>
+<input type="hidden" name="rowVersion" value="@Convert.ToBase64String(item.RowVersion)"/>
+<button class="small-button danger" type="submit">Cancel</button>
+</form>
+}</div>
+</td>
+</tr>
+}</tbody>
+</table>
+}</section>
+<div class="pagination">
+<span>@Model.Reservations.TotalCount reservation(s)</span>
+<div class="pagination-links">@if(previous){
+<a class="button secondary" asp-route-SearchTerm="@Model.SearchTerm" asp-route-Status="@Model.Status" asp-route-PageNumber="@(Model.Reservations.PageNumber-1)">Previous</a>
+}
+@if(next){
+<a class="button secondary" asp-route-SearchTerm="@Model.SearchTerm" asp-route-Status="@Model.Status" asp-route-PageNumber="@(Model.Reservations.PageNumber+1)">Next</a>
+}</div>
+</div>
+</main>
+<script src="~/js/security-ui.js" asp-append-version="true"></script>
+</body>
+</html>

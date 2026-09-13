@@ -1,0 +1,232 @@
+@import url("./fonts.css");
+    :root {
+    --ink:#1c2620;
+    --muted:#5f6b62;
+    --forest:#1f3d2e;
+    --deep:#16291f;
+    --paper:#f7f2e6;
+    --card:#fffdf8;
+    --border:#ded2b3;
+    --brass:#a9812e;
+    --danger:#9c3b2e;
+    --display:"Source Serif 4",Georgia,serif;
+    --ui:"IBM Plex Sans",sans-serif;
+}
+
+* {
+    box-sizing:border-box;
+}
+
+body {
+    margin:0;
+    min-width:320px;
+    color:var(--ink);
+    background:var(--paper);
+    font-family:var(--ui);
+}
+
+a {
+    color:inherit;
+    text-decoration:none;
+}
+
+button {
+    font:inherit;
+}
+
+.student-header {
+    display:flex;
+    min-height:62px;
+    align-items:center;
+    justify-content:space-between;
+    gap:1rem;
+    padding:.8rem clamp(1.25rem,4vw,2.5rem);
+    color:var(--paper);
+    background:linear-gradient(180deg,var(--forest),var(--deep));
+}
+
+.brand {
+    color:var(--paper);
+    font:600 1.1rem var(--display);
+}
+
+.nav {
+    display:flex;
+    align-items:center;
+    gap:1.3rem;
+}
+
+.nav a {
+    padding:.35rem 0;
+    color:#d9dfd6;
+}
+
+.nav a.active {
+    color:#fff;
+    border-bottom:2px solid var(--brass);
+}
+
+.account {
+    display:flex;
+    align-items:center;
+    gap:.8rem;
+    font-size:.84rem;
+}
+
+.account form {
+    margin:0;
+}
+
+.account button {
+    padding:0;
+    border:0;
+    color:#d9dfd6;
+    background:transparent;
+    cursor:pointer;
+}
+
+.page {
+    width:min(1040px,calc(100% - 2rem));
+    margin:0 auto;
+    padding:clamp(1.5rem,4vw,2.75rem) 0 4rem;
+}
+
+.heading {
+    display:flex;
+    align-items:end;
+    justify-content:space-between;
+    gap:1rem;
+    margin-bottom:1.5rem;
+}
+
+h1 {
+    margin:0;
+    color:var(--deep);
+    font:600 clamp(1.7rem,3vw,2.1rem) var(--display);
+}
+
+.subtitle {
+    margin:.4rem 0 0;
+    color:var(--muted);
+}
+
+.back {
+    padding:.65rem 1rem;
+    border:1px solid var(--forest);
+    border-radius:4px;
+    color:var(--forest);
+}
+
+.notice {
+    margin-bottom:1rem;
+    padding:.85rem 1rem;
+    border-left:3px solid var(--forest);
+    background:#e4eddf;
+}
+
+.notice.error {
+    border-color:var(--danger);
+    color:#812f25;
+    background:#f6dfda;
+}
+
+.loan-list {
+    display:grid;
+    gap:.85rem;
+}
+
+.loan {
+    display:grid;
+    grid-template-columns:minmax(0,1.6fr) minmax(130px,.7fr) minmax(105px,.55fr) auto;
+    align-items:center;
+    gap:1rem;
+    padding:1.1rem 1.25rem;
+    border:1px solid var(--border);
+    border-left:4px solid var(--forest);
+    background:var(--card);
+}
+
+.loan.overdue {
+    border-left-color:var(--danger);
+}
+
+.title {
+    display:block;
+    overflow:hidden;
+    font:600 1.06rem var(--display);
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.meta, .label {
+    color:var(--muted);
+    font-size:.8rem;
+}
+
+.value {
+    display:block;
+    margin-top:.2rem;
+    font-weight:500;
+}
+
+.status {
+    display:inline-block;
+    margin-top:.35rem;
+    padding:.2rem .5rem;
+    border-radius:999px;
+    color:#35523c;
+    background:#dfeadd;
+    font-size:.76rem;
+}
+
+.status.overdue {
+    color:#812f25;
+    background:#f3ddd8;
+}
+
+.renew {
+    padding:.55rem .85rem;
+    border:1px solid var(--brass);
+    border-radius:4px;
+    color:#765a1e;
+    background:transparent;
+    cursor:pointer;
+}
+
+.renew:hover {
+    color:#fff;
+    background:var(--brass);
+}
+
+.empty {
+    padding:3rem 1.5rem;
+    border:1px solid var(--border);
+    color:var(--muted);
+    background:var(--card);
+    text-align:center;
+}
+
+@media (max-width:760px) {
+    .student-header,.heading {
+    align-items:flex-start;
+    flex-direction:column;
+}
+
+.account>span {
+    display:none;
+}
+
+.loan {
+    grid-template-columns:1fr 1fr;
+}
+
+.loan form {
+    grid-column:1/-1;
+}
+
+.renew {
+    width:100%;
+}
+
+
+}

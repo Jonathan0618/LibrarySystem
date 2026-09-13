@@ -1,0 +1,39 @@
+{
+  "service": "LibrarySystem",
+  "environment": "PRODUCTION_ENVIRONMENT",
+  "probes": {
+    "liveness": {
+      "url": "https://library.example.edu/health/live",
+      "intervalSeconds": 60,
+      "timeoutSeconds": 10,
+      "alertAfterConsecutiveFailures": 3
+    },
+    "readiness": {
+      "url": "https://library.example.edu/health/ready",
+      "intervalSeconds": 60,
+      "timeoutSeconds": 10,
+      "maximumResponseMilliseconds": 2000,
+      "alertAfterConsecutiveFailures": 2
+    }
+  },
+  "logAlerts": [
+    { "condition": "http.status_code >= 500", "windowMinutes": 5, "threshold": 5, "severity": "critical" },
+    { "condition": "http.status_code == 429", "windowMinutes": 5, "threshold": 20, "severity": "warning" },
+    { "condition": "message contains 'background' and level >= Error", "windowMinutes": 10, "threshold": 1, "severity": "critical" },
+    { "condition": "message contains 'Notification' and message contains 'failed'", "windowMinutes": 15, "threshold": 5, "severity": "warning" }
+  ],
+  "infrastructureAlerts": [
+    { "metric": "database_storage_percent", "threshold": 80, "severity": "warning" },
+    { "metric": "verified_backup_age_hours", "threshold": 25, "severity": "critical" },
+    { "metric": "database_deadlocks", "windowMinutes": 15, "threshold": 1, "severity": "warning" }
+  ],
+  "requiredLogFields": [
+    "Timestamp",
+    "LogLevel",
+    "Category",
+    "TraceId",
+    "SpanId"
+  ],
+  "notificationChannel": "SET_IN_MONITORING_PLATFORM",
+  "runbook": "OPERATIONS_RUNBOOK.md"
+}

@@ -1,0 +1,18 @@
+HTTP/1.1 200 OK
+Content-Type: text/html; charset=utf-8
+Date: Sun, 13 Sep 2026 18:33:24 GMT
+Server: Kestrel
+Cache-Control: no-cache, no-store
+Pragma: no-cache
+Set-Cookie: .AspNetCore.Antiforgery.IyMTz1bCnTw=CfDJ8KSH5ySIt_lOuBqNdvwnF8swhXmQVVRJAsHxB5u69o3TNYvhFEivPQ4P-Bu-HYTniD5JJnBVesMxB0ZsxOXc8bGGAKiVTTMCL4bRPYCN-coo1wAJcIATZGw5FiIYNDoZacAT3W2HOkLDEd4EOXv33Yg; path=/; secure; samesite=strict; httponly
+Set-Cookie: .AspNetCore.Mvc.CookieTempDataProvider=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; samesite=lax; httponly
+Transfer-Encoding: chunked
+X-Correlation-ID: e1351ccb-c743-41f1-bcfe-1f1d88556d11
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+Referrer-Policy: strict-origin-when-cross-origin
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Resource-Policy: same-origin
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline'
+

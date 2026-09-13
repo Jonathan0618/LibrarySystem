@@ -3,9 +3,8 @@
 @inject UserManager<ApplicationUser> UserManager
 
 <ul>
-    @if (SignInManager.IsSignedIn(User))
-    {
-        <li>
+    @if (SignInManager.IsSignedIn(User)){
+<li>
             <span>@UserManager.GetUserName(User)</span>
         </li>
         <li>
@@ -13,11 +12,11 @@
                 <button type="submit">Sign out</button>
             </form>
         </li>
-    }
+}
     else
     {
         <li>
             <a asp-area="Identity" asp-page="/Account/Login">Sign in</a>
         </li>
-    }
+}
 </ul>

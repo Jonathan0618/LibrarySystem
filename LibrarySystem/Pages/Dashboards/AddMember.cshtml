@@ -1,0 +1,112 @@
+@page
+@using LibrarySystem.Domain.Members
+@model LibrarySystem.Pages.Dashboards.AddMemberModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Add member";
+    ViewData["ActiveNavigation"] = "Members";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Add member | School Library</title>
+    <link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/add-member.css" asp-append-version="true" />
+</head>
+<body>
+    <partial name="_DashboardHeader" />
+    <main class="page">
+        <div class="page-heading">
+            <div>
+                <h1>Add library member</h1>
+                <p class="subheading">Create an account and queue its email-confirmation link.</p>
+            </div>
+            <a class="button secondary" asp-page="./Members">Back to members</a>
+        </div>
+
+        <section class="form-panel member-form-panel" aria-labelledby="member-form-title">
+            <div class="section-heading">
+                <div>
+                    <h2 id="member-form-title">Account details</h2>
+                    <p>All members must confirm their school email before signing in.</p>
+                </div>
+            </div>
+
+            <form method="post" class="book-form member-form">
+                <div asp-validation-summary="ModelOnly" class="validation-errors form-wide" role="alert">
+</div>
+
+                <div class="field">
+                    <label asp-for="Input.FirstName">
+</label>
+                    <input asp-for="Input.FirstName" autocomplete="given-name" />
+                    <span asp-validation-for="Input.FirstName">
+</span>
+                </div>
+                <div class="field">
+                    <label asp-for="Input.LastName">
+</label>
+                    <input asp-for="Input.LastName" autocomplete="family-name" />
+                    <span asp-validation-for="Input.LastName">
+</span>
+                </div>
+                <div class="field form-wide">
+                    <label asp-for="Input.Email">
+</label>
+                    <input asp-for="Input.Email" type="email" autocomplete="email" />
+                    <span asp-validation-for="Input.Email">
+</span>
+                </div>
+                <div class="field">
+                    <label asp-for="Input.MemberType">
+</label>
+                    <select asp-for="Input.MemberType">
+                        <option value="@MemberType.Student">Student</option>
+                        <option value="@MemberType.Teacher">Teacher</option>
+                        @if (Model.CanCreateLibrarian){
+<option value="@MemberType.Librarian">Librarian</option>
+}
+                    </select>
+                    <span asp-validation-for="Input.MemberType">
+</span>
+                </div>
+                <div class="field">
+                    <label asp-for="Input.Grade">
+</label>
+                    <input asp-for="Input.Grade" placeholder="For students" />
+                    <span asp-validation-for="Input.Grade">
+</span>
+                </div>
+                <div class="field form-wide">
+                    <label asp-for="Input.Department">
+</label>
+                    <input asp-for="Input.Department" placeholder="For teachers or librarians" />
+                    <span asp-validation-for="Input.Department">
+</span>
+                </div>
+                <div class="field">
+                    <label asp-for="Input.TemporaryPassword">
+</label>
+                    <input asp-for="Input.TemporaryPassword" autocomplete="new-password" />
+                    <span class="field-hint">At least 12 characters with uppercase, lowercase, number, and symbol.</span>
+                    <span asp-validation-for="Input.TemporaryPassword">
+</span>
+                </div>
+                <div class="field">
+                    <label asp-for="Input.ConfirmPassword">
+</label>
+                    <input asp-for="Input.ConfirmPassword" autocomplete="new-password" />
+                    <span asp-validation-for="Input.ConfirmPassword">
+</span>
+                </div>
+                <div class="form-actions form-wide">
+                    <a class="button secondary" asp-page="./Members">Cancel</a>
+                    <button class="button" type="submit">Add member</button>
+                </div>
+            </form>
+        </section>
+    </main>
+</body>
+</html>

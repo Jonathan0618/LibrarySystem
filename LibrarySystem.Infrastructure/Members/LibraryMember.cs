@@ -2,6 +2,8 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using LibrarySystem.Domain.Members;
 using LibrarySystem.Infrastructure.Identity;
+using LibrarySystem.Infrastructure.Circulation;
+using LibrarySystem.Infrastructure.Reservations;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibrarySystem.Infrastructure.Members;
@@ -42,4 +44,8 @@ public sealed class LibraryMember
     [ForeignKey(nameof(UserId))]
     [DeleteBehavior(DeleteBehavior.Restrict)]
     public required ApplicationUser User { get; set; }
+
+    public ICollection<Loan> Loans { get; set; } = [];
+
+    public ICollection<Reservation> Reservations { get; set; } = [];
 }

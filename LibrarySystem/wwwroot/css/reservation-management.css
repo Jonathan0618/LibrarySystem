@@ -1,0 +1,30 @@
+.reservation-filters {
+    grid-template-columns: minmax(240px, 2fr) minmax(170px, 1fr) auto;
+}
+
+.reservation-actions {
+    display: flex;
+    min-width: 260px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: .4rem;
+}
+
+.reservation-actions form {
+    display: flex;
+    gap: .35rem;
+}
+
+.reservation-actions input {
+    min-width: 145px;
+    padding: .4rem;
+    border: 1px solid #cfc3a5;
+    border-radius: 4px;
+    background: #fffdf8;
+}
+
+@media (max-width: 800px) {
+    .reservation-filters {
+        grid-template-columns: 1fr;
+    }
+}

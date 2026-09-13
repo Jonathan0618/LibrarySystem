@@ -1,0 +1,94 @@
+@page
+@model LibrarySystem.Pages.Dashboards.FinesModel
+@{Layout=null;ViewData["ActiveNavigation"]="Fines";}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Fine management | School Library</title>
+<link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true"/>
+<link rel="stylesheet" href="~/css/fine-management.css" asp-append-version="true"/>
+</head>
+<body>
+<partial name="_DashboardHeader"/>
+<main class="page">
+<div class="page-heading">
+<div>
+<h1>Fine management</h1>
+<p class="subheading">Financial entries are immutable. Payments, adjustments, and waivers create permanent transaction records.</p>
+</div>
+<a class="button secondary" asp-page="./CirculationSettings">Fine rules</a>
+</div>
+@if(TempData["StatusMessage"] is string message){
+<div class="notice" role="status">@message</div>
+}
+@if(TempData["ErrorMessage"] is string error){
+<div class="notice error" role="alert">@error</div>
+}
+<form method="get" class="filters fine-filters">
+<input asp-for="SearchTerm" type="search" placeholder="Member number, name, or reason"/>
+<label class="checkbox-field">
+<input asp-for="OutstandingOnly"/> Outstanding only</label>
+<button class="button" type="submit">Search</button>
+</form>
+<section class="fine-list">@if(Model.Fines.Count==0){
+<div class="data-panel empty">No fines match the filters.</div>
+}else{@foreach(var fine in Model.Fines){
+<article class="form-panel fine-card">
+<div class="section-heading">
+<div>
+<h2>Fine #@fine.Id · @fine.Type</h2>
+<p>
+<a asp-page="./MemberDetails" asp-route-id="@fine.MemberId">@fine.MemberName (@fine.MemberNumber)</a> · @fine.Reason</p>
+</div>
+<div>
+<span class="badge @(fine.Balance>0 ? "inactive" : "")">@fine.Status</span>
+<strong class="fine-balance">@LibrarySystem.Application.Common.CurrencyFormatter.Format(fine.Balance)</strong>
+</div>
+</div>
+@if(fine.Balance>0){
+<form method="post" asp-page-handler="Action" class="fine-action-form">
+<input type="hidden" name="fineId" value="@fine.Id"/>
+<input type="hidden" name="rowVersion" value="@Convert.ToBase64String(fine.RowVersion)"/>
+<label>Amount<input name="amount" type="number" min="0.01" max="@fine.Balance" step="0.01" value="@fine.Balance" required/>
+</label>
+<label>Reason<input name="reason" maxlength="500" required/>
+</label>
+<label>Action<select name="action">
+<option value="payment">Payment</option>
+<option value="adjustment">Adjustment</option>
+<option value="waiver">Waiver entire balance</option>
+</select>
+</label>
+<button class="small-button" type="submit">Record</button>
+</form>
+}
+<details>
+<summary>Immutable transaction history (@fine.Transactions.Count)</summary>
+<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Type</th>
+<th>Amount</th>
+<th>Reason</th>
+<th>Actor</th>
+</tr>
+</thead>
+<tbody>@foreach(var transaction in fine.Transactions){
+<tr>
+<td>@transaction.CreatedAtUtc.ToLocalTime().ToString("g")</td>
+<td>@transaction.Type</td>
+<td>@LibrarySystem.Application.Common.CurrencyFormatter.Format(transaction.Amount)</td>
+<td>@transaction.Reason</td>
+<td>@(transaction.ActorUserId??"System")</td>
+</tr>
+}</tbody>
+</table>
+</details>
+</article>
+}}</section>
+</main>
+</body>
+</html>

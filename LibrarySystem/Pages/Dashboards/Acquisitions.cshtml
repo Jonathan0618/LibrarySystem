@@ -1,0 +1,113 @@
+@page
+@using LibrarySystem.Domain.Catalog
+@model LibrarySystem.Pages.Dashboards.AcquisitionsModel
+@{Layout=null;ViewData["ActiveNavigation"]="Acquisitions";}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Acquisitions | University Library</title>
+<link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true"/>
+<link rel="stylesheet" href="~/css/acquisitions.css" asp-append-version="true"/>
+</head>
+<body>
+<partial name="_DashboardHeader"/>
+<main class="page">
+<div class="page-heading">
+<div>
+<h1>New materials and donations</h1>
+<p class="subheading">Track purchases or gifts and receive them as catalogued physical copies.</p>
+</div>
+</div>
+@if(TempData["StatusMessage"] is string m){
+<div class="notice">@m</div>
+}
+@if(TempData["ErrorMessage"] is string e){
+<div class="notice error">@e</div>
+}<section class="summary-grid">
+<article>
+<span>@Model.Year allocation</span>
+<strong>@CurrencyFormatter.Format(Model.Budget.Allocated)</strong>
+</article>
+<article>
+<span>Received purchases</span>
+<strong>@CurrencyFormatter.Format(Model.Budget.Spent)</strong>
+</article>
+<article>
+<span>Remaining</span>
+<strong>@CurrencyFormatter.Format(Model.Budget.Remaining)</strong>
+</article>
+<article>
+<form method="post" asp-page-handler="Budget" class="budget-form">
+<input name="year" type="number" min="2000" max="2200" value="@Model.Year"/>
+<input name="amount" type="number" min="0" step="0.01" value="@Model.Budget.Allocated"/>
+<button class="small-button" type="submit">Set budget</button>
+</form>
+</article>
+</section>
+<section class="form-panel">
+<h2>Create purchase or donation record</h2>
+<form method="post" asp-page-handler="Create" class="book-form">
+<input name="orderNumber" maxlength="100" required placeholder="Reference number"/>
+<select name="bookId" required>
+<option value="">Book title</option>@foreach(var b in Model.Books){
+<option value="@b.Id">@b.Title</option>
+}</select>
+<select name="source">
+<option value="Purchase">Purchase</option>
+<option value="Donation">Donation</option>
+</select>
+<input name="donationSource" maxlength="200" placeholder="Donor or gift source"/>
+<input name="quantity" type="number" min="1" value="1"/>
+<input name="unitCost" type="number" min="0" step="0.01" value="0"/>
+<button class="button" type="submit">Create record</button>
+</form>
+</section>
+<section class="data-panel">
+<table>
+<thead>
+<tr>
+<th>Reference</th>
+<th>Title/source</th>
+<th>Quantity</th>
+<th>Cost</th>
+<th>Status</th>
+<th>Receiving</th>
+</tr>
+</thead>
+<tbody>@foreach(var x in Model.Records){
+<tr>
+<td>@x.OrderNumber</td>
+<td>
+<span class="primary">@x.BookTitle</span>
+<span class="secondary-text">@(x.Source==AcquisitionSource.Donation?$"Donation: {x.DonationSource}":"University purchase")</span>
+</td>
+<td>@x.QuantityReceived / @x.QuantityOrdered</td>
+<td>@CurrencyFormatter.Format(x.UnitCost)</td>
+<td>@x.Status</td>
+<td>@if(x.Status is not AcquisitionStatus.Received and not AcquisitionStatus.Cancelled){
+<form method="post" asp-page-handler="Receive" class="receive-form">
+<input type="hidden" name="id" value="@x.Id"/>
+<input type="hidden" name="rowVersion" value="@Convert.ToBase64String(x.RowVersion)"/>
+<input name="barcode" maxlength="100" required placeholder="New barcode"/>
+<select name="shelfId">
+<option value="">No shelf</option>@foreach(var s in Model.Shelves.Where(y=>y.IsActive)){
+<option value="@s.Id">@s.Name</option>
+}</select>
+<button class="small-button" type="submit">Receive copy</button>
+</form>
+<form method="post" asp-page-handler="Status">
+<input type="hidden" name="id" value="@x.Id"/>
+<input type="hidden" name="rowVersion" value="@Convert.ToBase64String(x.RowVersion)"/>
+<input type="hidden" name="status" value="Cancelled"/>
+<button class="small-button danger" type="submit">Cancel</button>
+</form>
+}</td>
+</tr>
+}</tbody>
+</table>
+</section>
+</main>
+</body>
+</html>

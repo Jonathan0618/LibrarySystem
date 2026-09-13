@@ -1,0 +1,23 @@
+@{
+    var activeStudentNavigation = ViewData["ActiveStudentNavigation"] as string;
+}
+<header class="student-ribbon">
+    <a class="student-ribbon__brand" asp-page="/Dashboards/StudentDashboard">
+        <span class="student-ribbon__seal" aria-hidden="true">SL</span>
+        <span>School Library</span>
+    </a>
+    <nav class="student-ribbon__nav" aria-label="Student navigation">
+        <a class="@(activeStudentNavigation == "Dashboard" ? "active" : null)" asp-page="/Dashboards/StudentDashboard">Dashboard</a>
+        <a class="@(activeStudentNavigation == "Catalog" ? "active" : null)" asp-page="/Dashboards/StudentCatalog">Catalog</a>
+        <a class="@(activeStudentNavigation == "Books" ? "active" : null)" asp-page="/Dashboards/MyBooks">My books</a>
+        <a class="@(activeStudentNavigation == "Holds" ? "active" : null)" asp-page="/Dashboards/MyHolds">My holds</a>
+        <a class="@(activeStudentNavigation == "History" ? "active" : null)" asp-page="/Dashboards/ReadingHistory">History</a>
+    </nav>
+    <div class="student-ribbon__account">
+        <a class="@(activeStudentNavigation == "Account" ? "active" : null)" asp-page="/Dashboards/Account">Account</a>
+        <span class="student-ribbon__email">@User.Identity?.Name</span>
+        <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/Identity/Account/Login" method="post">
+            <button type="submit">Sign out</button>
+        </form>
+    </div>
+</header>

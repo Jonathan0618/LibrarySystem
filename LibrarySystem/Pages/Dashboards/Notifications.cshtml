@@ -1,0 +1,107 @@
+@page
+@using LibrarySystem.Domain.Notifications
+@model LibrarySystem.Pages.Dashboards.NotificationsModel
+@{Layout=null;ViewData["ActiveNavigation"]="Notifications";}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Notifications | School Library</title>
+<link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true"/>
+<link rel="stylesheet" href="~/css/notification-management.css" asp-append-version="true"/>
+</head>
+<body>
+<partial name="_DashboardHeader"/>
+<main class="page">
+<div class="page-heading">
+<div>
+<h1>Notification delivery</h1>
+<p class="subheading">Sender: @Model.Operations.SenderIdentity · @(Model.Operations.UsesProductionSmtp?"Production SMTP":"Safe development capture")</p>
+</div>
+</div>
+@if(TempData["StatusMessage"] is string message){
+<div class="notice" role="status">@message</div>
+}
+@if(TempData["ErrorMessage"] is string error){
+<div class="notice error" role="alert">@error</div>
+}
+@if(!Model.Operations.SmtpConfigured){
+<div class="notice error" role="alert">SMTP is not configured. Supply host, username, password, sender address, and sender name through the production secret/configuration store.</div>
+}
+<section class="summary-grid">
+<article>
+<span>Pending</span>
+<strong>@Model.Operations.PendingCount</strong>
+</article>
+<article>
+<span>Processing</span>
+<strong>@Model.Operations.ProcessingCount</strong>
+</article>
+<article>
+<span>Failed</span>
+<strong>@Model.Operations.FailedCount</strong>
+</article>
+<article>
+<span>Sent</span>
+<strong>@Model.Operations.SentCount</strong>
+</article>
+</section>
+<section class="form-panel">
+<h2>Queue delivery test</h2>
+<form method="post" asp-page-handler="Test" class="notification-test">
+<label>Recipient<input name="recipientEmail" type="email" required/>
+</label>
+<label>Template<select name="type" asp-items="Html.GetEnumSelectList<NotificationType>()">
+</select>
+</label>
+<button class="button" type="submit">Queue test</button>
+</form>
+<p class="section-note">Tests use finalized school-library wording for due-soon, overdue, reservation-ready, and account-security messages. Delivery is processed by the normal retrying worker.</p>
+</section>
+<section class="data-panel">
+<div class="section-title">
+<h2>Recent outbox activity</h2>
+</div>
+@if(Model.Operations.RecentItems.Count==0){
+<div class="empty">The notification outbox is empty.</div>
+}else{<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Type</th>
+<th>Recipient</th>
+<th>Subject</th>
+<th>Status</th>
+<th>Attempts</th>
+<th>Delivery</th>
+<th>
+</th>
+</tr>
+</thead>
+<tbody>@foreach(var item in Model.Operations.RecentItems){
+<tr>
+<td>#@item.Id</td>
+<td>@item.Type</td>
+<td>@item.RecipientEmail</td>
+<td>@item.Subject@if(!string.IsNullOrWhiteSpace(item.LastError)){
+<span class="secondary-text notification-error">@item.LastError</span>
+}</td>
+<td>
+<span class="badge @(item.Status==NotificationStatus.Failed?"inactive":"")">@item.Status</span>
+</td>
+<td>@item.AttemptCount</td>
+<td>@(item.SentAtUtc?.ToLocalTime().ToString("g")??$"Next: {item.NextAttemptAtUtc.ToLocalTime():g}")</td>
+<td>@if(item.Status!=NotificationStatus.Sent){
+<form method="post" asp-page-handler="Retry">
+<input type="hidden" name="id" value="@item.Id"/>
+<button class="small-button" type="submit">Retry</button>
+</form>
+}</td>
+</tr>
+}</tbody>
+</table>
+}</section>
+</main>
+</body>
+</html>

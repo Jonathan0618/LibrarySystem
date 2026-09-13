@@ -1,0 +1,10 @@
+@page
+@model LibrarySystem.Areas.Identity.Pages.Account.ConfirmEmailChangeModel
+@{ Layout = "/Areas/Identity/Pages/Shared/_Layout.cshtml"; ViewData["Title"] = "Confirm new email"; }
+<section aria-labelledby="page-title">
+<h1 id="page-title">Email address change</h1>
+<div class="status-panel @(Model.Succeeded ? "success" : "error")" role="@(Model.Succeeded ? "status" : "alert")">@(Model.Succeeded ? "Your email address was updated. Sign in again using the new address." : "The email-change link is invalid or has expired.")</div>
+<nav class="identity-links">
+<a asp-page="./Login">Return to sign in</a>
+</nav>
+</section>

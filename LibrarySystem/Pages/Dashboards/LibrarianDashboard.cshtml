@@ -1,0 +1,171 @@
+@page
+@model LibrarySystem.Pages.Dashboards.LibrarianDashboardModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Librarian Dashboard";
+    ViewData["ActiveNavigation"] = "Dashboard";
+
+    var dashboard = Model.Dashboard;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <title>@ViewData["Title"] | School Library</title>
+    <link rel="stylesheet" href="~/css/librarian-dashboard.css" asp-append-version="true" />
+</head>
+<body>
+    <partial name="_DashboardHeader" />
+
+    <main class="dashboard">
+        <div class="dashboard-intro">
+            <div>
+                <h1>Welcome, @dashboard.LibrarianName</h1>
+                <p>Here's what's happening in the library today.</p>
+            </div>
+            <form class="search-box" method="get" asp-page="/Dashboards/Catalog">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="M21 21l-4.3-4.3" />
+                </svg>
+                <input type="search" name="SearchTerm" placeholder="Search catalog" aria-label="Search catalog" />
+            </form>
+        </div>
+
+        <div class="stat-row">
+            <div class="stat-card">
+                <div class="value">@dashboard.CheckedOutToday</div>
+                <div class="label">Checked out today</div>
+            </div>
+            <div class="stat-card">
+                <div class="value alert">@dashboard.OverdueItems</div>
+                <div class="label">Overdue items</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">@dashboard.NewMembersThisWeek</div>
+                <div class="label">New members this week</div>
+            </div>
+            <div class="stat-card">
+                <div class="value">@dashboard.CatalogItems.ToString("N0")</div>
+                <div class="label">Items in catalog</div>
+            </div>
+            <div class="stat-card">
+<div class="value">@CurrencyFormatter.Format(dashboard.OutstandingFineBalance)</div>
+                <div class="label">Outstanding fines</div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="main-col">
+                <section class="panel">
+                    <div class="panel-header">
+                        <h2>Recent activity</h2>
+                        <a asp-page="/Dashboards/Reports">View reports</a>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Book</th>
+                                <th>Action</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var entry in dashboard.RecentActivity){
+<tr>
+                                    <td data-label="Member">@entry.MemberName</td>
+                                    <td data-label="Book" class="book-cell">@entry.BookTitle</td>
+                                    <td data-label="Action">
+                                        <span class="status @(entry.Action == "Returned" ? "returned" : "checked-out")">@entry.Action</span>
+                                    </td>
+                                    <td data-label="Date">@entry.OccurredAtUtc.ToLocalTime().ToString("MMM d, h:mm tt")</td>
+                                </tr>
+}
+                        </tbody>
+                    </table>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-header">
+                        <h2>Overdue items</h2>
+                        <a asp-page="/Dashboards/Checkouts" asp-route-Status="Overdue">View all</a>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Book</th>
+                                <th>Due date</th>
+                                <th>Status</th>
+                                <th>
+</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in dashboard.OverdueLoans){
+<tr>
+                                    <td data-label="Member">@item.MemberName</td>
+                                    <td data-label="Book" class="book-cell">@item.BookTitle</td>
+                                    <td data-label="Due date">@item.DueAtUtc.ToLocalTime().ToString("MMM d")</td>
+                                    <td data-label="Status">
+                                        <span class="status overdue">@item.DaysOverdue days overdue</span>
+                                    </td>
+                                    <td data-label="">
+                                        <a class="remind-button" asp-page="/Dashboards/Notifications">Notifications</a>
+                                    </td>
+                                </tr>
+}
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+
+            <aside class="side-col">
+                <section class="panel">
+                    <div class="panel-header">
+<h2>Quick actions</h2>
+</div>
+                    <div class="quick-actions">
+                        <a asp-page="/Dashboards/Checkouts">Check out a book <span class="arrow">→</span>
+</a>
+                        <a asp-page="/Dashboards/AddMember">Register a member <span class="arrow">&rarr;</span>
+</a>
+                        <a asp-page="/Dashboards/Books">Add catalog item <span class="arrow">→</span>
+</a>
+                        <a asp-page="/Dashboards/Checkouts">Process a return <span class="arrow">→</span>
+</a>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-header">
+<h2>This week</h2>
+</div>
+                    <ul class="summary-list">
+                        <li>
+<span>Checkouts</span>
+<span class="num">@dashboard.WeeklyCheckouts</span>
+</li>
+                        <li>
+<span>Returns</span>
+<span class="num">@dashboard.WeeklyReturns</span>
+</li>
+                        <li>
+<span>Holds placed</span>
+<span class="num">@dashboard.WeeklyReservations</span>
+</li>
+                        <li>
+<span>New titles added</span>
+<span class="num">@dashboard.WeeklyNewTitles</span>
+</li>
+                    </ul>
+                </section>
+            </aside>
+        </div>
+    </main>
+</body>
+</html>

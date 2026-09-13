@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 namespace LibrarySystem.Infrastructure.Auditing;
 
 [Index(nameof(CreatedAtUtc))]
+[Index(nameof(CreatedAtUtc), nameof(Id))]
 [Index(nameof(TargetType), nameof(TargetId))]
 public sealed class AuditLog
 {

@@ -1,0 +1,120 @@
+@page
+@using LibrarySystem.Domain.Catalog
+@model LibrarySystem.Pages.Dashboards.InventoryModel
+@{Layout=null;ViewData["ActiveNavigation"]="Inventory";}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Inventory | School Library</title>
+<link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true"/>
+<link rel="stylesheet" href="~/css/inventory.css" asp-append-version="true"/>
+</head>
+<body>
+<partial name="_DashboardHeader"/>
+<main class="page">
+<div class="page-heading">
+<div>
+<h1>Physical inventory</h1>
+<p class="subheading">Create a fixed expected-copy list, scan found copies, and reconcile discrepancies without deleting history.</p>
+</div>
+</div>
+@if(TempData["StatusMessage"] is string m){
+<div class="notice">@m</div>
+}
+@if(TempData["ErrorMessage"] is string e){
+<div class="notice error">@e</div>
+}
+<section class="form-panel">
+<form method="post" asp-page-handler="Start" class="inventory-start">
+<input name="name" maxlength="200" required placeholder="Inventory session name"/>
+<button class="button" type="submit">Start stocktake</button>
+</form>
+</section>
+<section class="data-panel">
+<table>
+<thead>
+<tr>
+<th>Session</th>
+<th>Status</th>
+<th>Expected</th>
+<th>Found</th>
+<th>Missing</th>
+</tr>
+</thead>
+<tbody>@foreach(var x in Model.Sessions){
+<tr>
+<td>
+<a class="small-button" asp-route-Id="@x.Id">@x.Name</a>
+<span class="secondary-text">@x.StartedAtUtc.ToLocalTime().ToString("g")</span>
+</td>
+<td>@x.Status</td>
+<td>@x.ExpectedCount</td>
+<td>@x.FoundCount</td>
+<td>@x.MissingCount</td>
+</tr>
+}</tbody>
+</table>
+</section>
+@if(Model.Session is {} s){
+<section class="form-panel inventory-toolbar">
+<div>
+<h2>@s.Name</h2>
+<p>@s.FoundCount of @s.ExpectedCount found · @s.MissingCount missing</p>
+</div>
+@if(s.Status==InventorySessionStatus.Open){
+<form method="post" asp-page-handler="Scan">
+<input type="hidden" name="id" value="@s.Id"/>
+<input name="barcode" required placeholder="Scan barcode" autofocus/>
+<button class="button" type="submit">Mark found</button>
+</form>
+<form method="post" asp-page-handler="Complete" data-confirm="Complete this stocktake? Unscanned copies will become discrepancies.">
+<input type="hidden" name="id" value="@s.Id"/>
+<button class="small-button danger" type="submit">Complete</button>
+</form>
+}</section>
+<section class="data-panel">
+<table>
+<thead>
+<tr>
+<th>Copy</th>
+<th>Title</th>
+<th>Shelf</th>
+<th>Current status</th>
+<th>Inventory</th>
+<th>Reconcile</th>
+</tr>
+</thead>
+<tbody>@foreach(var copy in s.Copies){
+<tr>
+<td>@copy.Barcode</td>
+<td>@copy.Title</td>
+<td>@(copy.Shelf??"—")</td>
+<td>@copy.Status</td>
+<td>
+<span class="badge @(!copy.Found?"inactive":"")">@(copy.Found?"Found":"Missing")</span>
+</td>
+<td>@if(!copy.Found&&s.Status==InventorySessionStatus.Completed){
+<div class="inventory-actions">
+<form method="post" asp-page-handler="Reconcile">
+<input type="hidden" name="id" value="@s.Id"/>
+<input type="hidden" name="copyId" value="@copy.CopyId"/>
+<button class="small-button" type="submit">Mark lost</button>
+</form>
+<form method="post" asp-page-handler="Withdraw">
+<input type="hidden" name="id" value="@s.Id"/>
+<input type="hidden" name="copyId" value="@copy.CopyId"/>
+<input name="reason" maxlength="500" required placeholder="Withdrawal reason"/>
+<button class="small-button danger" type="submit">Withdraw</button>
+</form>
+</div>
+}</td>
+</tr>
+}</tbody>
+</table>
+</section>
+}</main>
+<script src="~/js/security-ui.js" asp-append-version="true"></script>
+</body>
+</html>

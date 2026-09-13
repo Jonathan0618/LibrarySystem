@@ -1,0 +1,39 @@
+.inventory-start,.inventory-toolbar,.inventory-toolbar form,.inventory-actions {
+    display:flex;
+    align-items:center;
+    gap:.6rem
+}
+
+.inventory-start input,.inventory-toolbar input,.inventory-actions input {
+    padding:.6rem;
+    border:1px solid #cfc3a5;
+    border-radius:4px;
+    background:#fffdf8
+}
+
+.inventory-start input {
+    flex:1
+}
+
+.inventory-toolbar {
+    justify-content:space-between;
+    flex-wrap:wrap
+}
+
+.inventory-toolbar h2,.inventory-toolbar p {
+    margin:.2rem 0
+}
+
+.inventory-actions {
+    min-width:320px;
+    flex-wrap:wrap
+}
+
+@media(max-width:800px) {
+    .inventory-start,.inventory-toolbar {
+    align-items:stretch;
+    flex-direction:column
+}
+
+
+}

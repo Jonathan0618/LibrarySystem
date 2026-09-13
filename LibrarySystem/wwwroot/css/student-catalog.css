@@ -1,0 +1,4 @@
+.student-nav { display:flex; align-items:center; gap:1.25rem; }
+    .student-nav a { color:#d9dfd6; }
+    .student-nav a.active { color:#fff; border-bottom:2px solid #a9812e; }
+    .catalog-actions { display:flex; justify-content:flex-end; }

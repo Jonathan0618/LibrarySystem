@@ -18,6 +18,8 @@ public sealed class ApplicationUser : IdentityUser
 
     public bool IsActive { get; set; } = true;
 
+    public bool MustChangePassword { get; set; }
+
     [Precision(0)]
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 

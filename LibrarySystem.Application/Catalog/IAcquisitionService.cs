@@ -1,0 +1,3 @@
+using LibrarySystem.Domain.Catalog;
+namespace LibrarySystem.Application.Catalog;
+public interface IAcquisitionService { Task<IReadOnlyCollection<AcquisitionDto>> ListAsync(CancellationToken token=default); Task<AcquisitionDto> CreateAsync(string orderNumber,long bookId,AcquisitionSource source,string? donationSource,int quantity,decimal unitCost,CancellationToken token=default); Task ReceiveAsync(long id,string barcode,int? shelfId,byte[] rowVersion,CancellationToken token=default); Task SetStatusAsync(long id,AcquisitionStatus status,byte[] rowVersion,CancellationToken token=default); Task<AcquisitionBudgetDto> GetBudgetAsync(int year,CancellationToken token=default); Task SetBudgetAsync(int year,decimal amount,CancellationToken token=default); }

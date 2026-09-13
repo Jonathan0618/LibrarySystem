@@ -20,4 +20,10 @@ public interface ICatalogReferenceService
     Task<IReadOnlyCollection<CatalogReferenceDto>> GetPublishersAsync(CancellationToken cancellationToken = default);
 
     Task<IReadOnlyCollection<CatalogReferenceDto>> GetShelvesAsync(CancellationToken cancellationToken = default);
+
+    Task<CatalogReferenceDto?> UpdateAsync(
+        string type, int id, string name, string? description, CancellationToken cancellationToken = default);
+
+    Task<bool> SetActiveAsync(
+        string type, int id, bool isActive, CancellationToken cancellationToken = default);
 }

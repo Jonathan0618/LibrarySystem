@@ -1,0 +1,186 @@
+@page "{id:long}"
+@model LibrarySystem.Pages.Dashboards.MemberDetailsModel
+@{ Layout = null; ViewData["ActiveNavigation"] = "Members"; var member = Model.Details.Member; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>@member.FirstName @member.LastName | School Library</title>
+<link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true" />
+</head>
+<body>
+<partial name="_DashboardHeader" />
+<main class="page">
+<div class="page-heading">
+<div>
+<h1>@member.FirstName @member.LastName</h1>
+<p class="subheading">@member.MemberNumber · @member.MemberType</p>
+</div>
+<div class="row-actions">
+<a class="button secondary" asp-page="./Members">Back</a>
+<a class="button" asp-page="./EditMember" asp-route-id="@member.Id">Edit member</a>
+</div>
+</div>
+@if (TempData["StatusMessage"] is string status){
+<div class="notice" role="status">@status</div>
+}
+@if (TempData["ErrorMessage"] is string error){
+<div class="notice error" role="alert">@error</div>
+}
+<section class="summary-grid">
+<article>
+<span>Account</span>
+<strong>@(member.IsActive ? "Active" : "Inactive")</strong>
+</article>
+<article>
+<span>Current loans</span>
+<strong>@Model.Details.CurrentLoans.Count</strong>
+</article>
+<article>
+<span>Overdue</span>
+<strong>@Model.Details.OverdueLoanCount</strong>
+</article>
+<article>
+<span>Outstanding</span>
+<strong>@CurrencyFormatter.Format(Model.Details.OutstandingBalance)</strong>
+</article>
+</section>
+<section class="form-panel">
+<div class="section-heading">
+<h2>Profile</h2>
+<form method="post" asp-page-handler="Status">
+<input type="hidden" name="id" value="@member.Id"/>
+<input type="hidden" name="active" value="@(!member.IsActive)"/>
+<button class="small-button @(member.IsActive ? "danger" : "")" type="submit" disabled="@(member.IsActive && !Model.Details.CanDeactivate)">@(member.IsActive ? "Deactivate" : "Activate")</button>
+</form>
+</div>
+<dl class="details-list">
+<dt>Email</dt>
+<dd>@member.Email</dd>
+<dt>Email status</dt>
+<dd>@(member.EmailConfirmed ? "Confirmed" : "Unconfirmed")</dd>
+<dt>Grade</dt>
+<dd>@(member.Grade ?? "—")</dd>
+<dt>Department</dt>
+<dd>@(member.Department ?? "—")</dd>
+<dt>Created</dt>
+<dd>@member.CreatedAtUtc.ToLocalTime().ToString("g")</dd>
+</dl>
+@if (member.IsActive && !Model.Details.CanDeactivate){
+<p class="notice error">Deactivation is blocked until all current loans, active reservations, and outstanding fines are resolved.</p>
+}</section>
+<section class="data-panel">
+<div class="section-title">
+<h2>Current loans</h2>
+</div>
+@if(Model.Details.CurrentLoans.Count==0){
+<div class="empty">No current loans.</div>
+}else{<table>
+<thead>
+<tr>
+<th>Title</th>
+<th>Barcode</th>
+<th>Due</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>@foreach(var item in Model.Details.CurrentLoans){
+<tr>
+<td>@item.Title</td>
+<td>@item.Barcode</td>
+<td>@item.DueAtUtc.ToLocalTime().ToString("g")</td>
+<td>
+<span class="badge @(item.IsOverdue ? "inactive" : "")">@(item.IsOverdue ? "Overdue" : item.Status)</span>
+</td>
+</tr>
+}</tbody>
+</table>
+}</section>
+<section class="data-panel">
+<div class="section-title">
+<h2>Active reservations</h2>
+</div>
+@if(Model.Details.Reservations.Count==0){
+<div class="empty">No active reservations.</div>
+}else{<table>
+<thead>
+<tr>
+<th>Title</th>
+<th>Status</th>
+<th>Placed</th>
+<th>Expires</th>
+</tr>
+</thead>
+<tbody>@foreach(var item in Model.Details.Reservations){
+<tr>
+<td>@item.Title</td>
+<td>@item.Status</td>
+<td>@item.CreatedAtUtc.ToLocalTime().ToString("g")</td>
+<td>@(item.ExpiresAtUtc?.ToLocalTime().ToString("g") ?? "—")</td>
+</tr>
+}</tbody>
+</table>
+}</section>
+<section class="data-panel">
+<div class="section-title">
+<h2>Outstanding fines</h2>
+</div>
+@if(Model.Details.OutstandingFines.Count==0){
+<div class="empty">No outstanding fines.</div>
+}else{<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Reason</th>
+<th>Date</th>
+<th>Balance</th>
+<th>Resolution</th>
+</tr>
+</thead>
+<tbody>@foreach(var item in Model.Details.OutstandingFines){
+<tr>
+<td>@item.Type</td>
+<td>@item.Reason</td>
+<td>@item.CreatedAtUtc.ToLocalTime().ToString("d")</td>
+<td>@CurrencyFormatter.Format(item.Balance)</td>
+<td>
+<form method="post" asp-page-handler="ResolveFine" class="fine-resolution">
+<input type="hidden" name="id" value="@member.Id"/>
+<input type="hidden" name="fineId" value="@item.Id"/>
+<input type="hidden" name="rowVersion" value="@Convert.ToBase64String(item.RowVersion)"/>
+<input name="amount" type="number" min="0.01" step="0.01" max="@item.Balance" value="@item.Balance" aria-label="Payment amount"/>
+<input name="reason" maxlength="500" required placeholder="Resolution reason"/>
+<button class="small-button" name="waive" value="false" type="submit">Payment</button>
+<button class="small-button danger" name="waive" value="true" type="submit" data-confirm="Waive this entire fine?">Waive</button>
+</form>
+</td>
+</tr>
+}</tbody>
+</table>
+}</section>
+<section class="data-panel">
+<div class="section-title">
+<h2>Recent library activity</h2>
+</div>
+@if(Model.Details.RecentActivity.Count==0){
+<div class="empty">No activity recorded.</div>
+}else{<table>
+<thead>
+<tr>
+<th>Activity</th>
+<th>Date</th>
+</tr>
+</thead>
+<tbody>@foreach(var item in Model.Details.RecentActivity){
+<tr>
+<td>@item.Description</td>
+<td>@item.OccurredAtUtc.ToLocalTime().ToString("g")</td>
+</tr>
+}</tbody>
+</table>
+}</section>
+</main>
+<script src="~/js/security-ui.js" asp-append-version="true"></script>
+</body>
+</html>

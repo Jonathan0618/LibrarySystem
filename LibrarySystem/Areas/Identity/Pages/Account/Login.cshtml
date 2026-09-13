@@ -12,513 +12,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light" />
     <title>@ViewData["Title"] | School Library</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-    <style>
-
-        :root {
-            --ink: #1c2620;
-            --ink-soft: #52604f;
-            --forest: #1f3d2e;
-            --forest-deep: #16291f;
-            --parchment: #f7f2e6;
-            --parchment-dim: #efe8d6;
-            --border: #ded2b3;
-            --brass: #a9812e;
-            --brass-text: #8a6a22;
-            --brass-light: #c9a55c;
-            --rule-blue: #b9cbda;
-            --rule-red: #a6432b;
-            --error: #9c3b2e;
-            --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
-            --font-ui: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        html, body {
-            height: 100%;
-        }
-
-        body {
-            margin: 0;
-            font-family: var(--font-ui);
-            color: var(--ink);
-            background: var(--parchment);
-            -webkit-font-smoothing: antialiased;
-        }
-
-        h1, h2 {
-            font-family: var(--font-display);
-            margin: 0;
-            color: inherit;
-        }
-
-        p {
-            margin: 0;
-        }
-
-        a {
-            color: var(--brass-text);
-            text-decoration: none;
-        }
-
-            a:hover {
-                text-decoration: underline;
-            }
-
-        button {
-            font-family: inherit;
-        }
-
-        :focus-visible {
-            outline: 2px solid var(--brass);
-            outline-offset: 3px;
-        }
-
-        /* Layout */
-
-        .login-shell {
-            min-height: 100vh;
-            display: grid;
-            grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-        }
-
-        /* Left panel — the reading room */
-
-        .library-panel {
-            background: radial-gradient(120% 140% at 15% 0%, var(--forest) 0%, var(--forest-deep) 78%);
-            color: var(--parchment);
-            padding: clamp(2.5rem, 5vw, 4.5rem);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            gap: clamp(1.75rem, 3vw, 2.5rem);
-        }
-
-        .seal {
-            width: 68px;
-            height: 68px;
-            border-radius: 50%;
-            border: 1.5px solid var(--brass);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            flex-shrink: 0;
-        }
-
-            .seal::before {
-                content: "";
-                position: absolute;
-                inset: 6px;
-                border: 1px solid var(--brass);
-                border-radius: 50%;
-                opacity: 0.55;
-            }
-
-            .seal svg {
-                width: 28px;
-                height: 28px;
-                position: relative;
-                z-index: 1;
-            }
-
-                .seal svg path {
-                    fill: var(--parchment);
-                }
-
-        .panel-copy {
-            max-width: 30ch;
-            display: flex;
-            flex-direction: column;
-            gap: 0.9rem;
-        }
-
-        .library-panel h1 {
-            font-size: clamp(1.7rem, 2.6vw, 2.35rem);
-            font-weight: 600;
-            line-height: 1.2;
-            letter-spacing: -0.01em;
-        }
-
-        .welcome-copy {
-            color: #d6ddd2;
-            font-size: 0.98rem;
-            line-height: 1.6;
-            max-width: 34ch;
-        }
-
-        /* Bookshelf — a literal shelf of spines, the panel's one bold flourish */
-
-        .shelf {
-            display: flex;
-            align-items: flex-end;
-            gap: 6px;
-            height: 58px;
-            border-bottom: 2px solid var(--brass);
-            max-width: 260px;
-        }
-
-            .shelf .spine {
-                flex: 0 0 auto;
-                width: 13px;
-                border-radius: 2px 2px 0 0;
-            }
-
-                .shelf .spine:nth-child(1) {
-                    height: 64%;
-                    width: 12px;
-                    background: var(--brass-light);
-                }
-
-                .shelf .spine:nth-child(2) {
-                    height: 100%;
-                    width: 10px;
-                    background: #e4dabb;
-                }
-
-                .shelf .spine:nth-child(3) {
-                    height: 52%;
-                    width: 16px;
-                    background: var(--brass);
-                }
-
-                .shelf .spine:nth-child(4) {
-                    height: 88%;
-                    width: 18px;
-                    background: #8fa98f;
-                }
-
-                .shelf .spine:nth-child(5) {
-                    height: 62%;
-                    width: 11px;
-                    background: #c9a55c;
-                }
-
-                .shelf .spine:nth-child(6) {
-                    height: 94%;
-                    width: 9px;
-                    background: #e9e0c6;
-                }
-
-                .shelf .spine:nth-child(7) {
-                    height: 72%;
-                    width: 15px;
-                    background: #8a6a22;
-                }
-
-        .library-panel blockquote {
-            margin: 0;
-            padding-top: 1.5rem;
-            border-top: 1px solid rgba(201, 165, 92, 0.35);
-            font-family: var(--font-display);
-            font-style: italic;
-            font-size: 1rem;
-            line-height: 1.55;
-            max-width: 36ch;
-            color: #e7e2d2;
-        }
-
-            .library-panel blockquote cite {
-                display: block;
-                margin-top: 0.6rem;
-                font-style: normal;
-                font-size: 0.85rem;
-                color: var(--brass-light);
-            }
-
-        /* Right panel — the index card */
-
-        .form-panel {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: clamp(2rem, 5vw, 4rem);
-            background: var(--parchment);
-        }
-
-        .form-card {
-            width: 100%;
-            max-width: 420px;
-            position: relative;
-            padding: clamp(2rem, 4vw, 2.75rem) clamp(1.75rem, 4vw, 2.5rem) 2.25rem;
-            padding-left: calc(clamp(1.75rem, 4vw, 2.5rem) + 1.1rem);
-            background: repeating-linear-gradient( to bottom, transparent 0, transparent 2.6rem, var(--rule-blue) 2.6rem, var(--rule-blue) calc(2.6rem + 1px) ), var(--parchment-dim);
-            background-position: 0 6.5rem, 0 0;
-            border: 1px solid var(--border);
-            border-top: 3px solid var(--brass);
-            box-shadow: 0 24px 48px -28px rgba(28, 38, 32, 0.35);
-            animation: card-in 0.5s ease-out;
-        }
-
-            .form-card::before {
-                content: "";
-                position: absolute;
-                top: 0;
-                bottom: 0;
-                left: clamp(2.3rem, 5.5vw, 3.1rem);
-                width: 1px;
-                background: var(--rule-red);
-                opacity: 0.5;
-            }
-
-        @@keyframes card-in {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @@media (prefers-reduced-motion: reduce) {
-            .form-card {
-                animation: none;
-            }
-        }
-
-        .mobile-brand {
-            display: none;
-            align-items: center;
-            gap: 0.6rem;
-            margin-bottom: 1.75rem;
-            font-family: var(--font-display);
-            font-size: 1.05rem;
-            color: var(--forest);
-        }
-
-        .mobile-brand-icon {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            border: 1.5px solid var(--brass);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.85rem;
-            color: var(--forest);
-        }
-
-        .form-card header {
-            margin-bottom: 1.75rem;
-        }
-
-        .form-card h2 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--forest-deep);
-            margin-bottom: 0.4rem;
-        }
-
-        .form-card header p {
-            color: var(--ink-soft);
-            font-size: 0.92rem;
-            line-height: 1.5;
-        }
-
-        /* Validation */
-
-        .validation-summary {
-            color: var(--error);
-            font-size: 0.88rem;
-            margin-bottom: 1rem;
-        }
-
-            .validation-summary:empty {
-                display: none;
-            }
-
-        .field-error {
-            display: block;
-            color: var(--error);
-            font-size: 0.8rem;
-            margin-top: 0.35rem;
-            min-height: 1em;
-        }
-
-        /* Fields */
-
-        .field-group {
-            margin-bottom: 1.5rem;
-        }
-
-            .field-group label {
-                display: block;
-                font-family: var(--font-display);
-                font-style: italic;
-                font-size: 0.92rem;
-                color: var(--ink-soft);
-                margin-bottom: 0.5rem;
-            }
-
-        .label-row {
-            display: flex;
-            align-items: baseline;
-            justify-content: space-between;
-            gap: 1rem;
-        }
-
-            .label-row label {
-                margin-bottom: 0.5rem;
-            }
-
-            .label-row a {
-                font-size: 0.82rem;
-                font-family: var(--font-ui);
-                font-style: normal;
-                white-space: nowrap;
-            }
-
-        .input-wrap {
-            display: flex;
-            align-items: center;
-            gap: 0.65rem;
-            border-bottom: 1.5px solid var(--border);
-            padding-bottom: 0.5rem;
-            transition: border-color 0.15s ease;
-        }
-
-            .input-wrap:focus-within {
-                border-color: var(--brass);
-            }
-
-            .input-wrap svg {
-                flex-shrink: 0;
-                width: 18px;
-                height: 18px;
-                fill: none;
-                stroke: var(--ink-soft);
-                stroke-width: 1.5;
-                stroke-linecap: round;
-                stroke-linejoin: round;
-                transition: stroke 0.15s ease;
-            }
-
-            .input-wrap:focus-within svg {
-                stroke: var(--brass-text);
-            }
-
-            .input-wrap input {
-                flex: 1;
-                min-width: 0;
-                border: none;
-                background: transparent;
-                font-family: var(--font-ui);
-                font-size: 0.98rem;
-                color: var(--ink);
-                padding: 0.15rem 0;
-            }
-
-                .input-wrap input:focus {
-                    outline: none;
-                }
-
-                .input-wrap input::placeholder {
-                    color: #9aa398;
-                }
-
-        .password-toggle {
-            flex-shrink: 0;
-            border: none;
-            background: none;
-            color: var(--brass-text);
-            font-size: 0.82rem;
-            cursor: pointer;
-            padding: 0.2rem 0.3rem;
-        }
-
-            .password-toggle:hover {
-                text-decoration: underline;
-            }
-
-        /* Remember me */
-
-        .remember-option {
-            display: flex;
-            align-items: center;
-            gap: 0.55rem;
-            font-size: 0.9rem;
-            color: var(--ink-soft);
-            margin-bottom: 1.75rem;
-            cursor: pointer;
-        }
-
-            .remember-option input {
-                width: 16px;
-                height: 16px;
-                accent-color: var(--brass);
-            }
-
-        /* Submit */
-
-        .submit-button {
-            width: 100%;
-            padding: 0.85rem 1rem;
-            border: none;
-            border-radius: 4px;
-            background: var(--forest);
-            color: var(--parchment);
-            font-size: 0.98rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.15s ease;
-        }
-
-            .submit-button:hover {
-                background: var(--forest-deep);
-            }
-
-        .help-copy {
-            margin-top: 1.5rem;
-            font-size: 0.85rem;
-            color: var(--ink-soft);
-            text-align: center;
-        }
-
-        /* Responsive */
-
-        @@media (max-width: 900px) {
-            .login-shell {
-                grid-template-columns: 1fr;
-            }
-
-            .library-panel {
-                display: none;
-            }
-
-            .form-panel {
-                min-height: 100vh;
-                padding: 1.75rem 1.25rem;
-            }
-
-            .mobile-brand {
-                display: flex;
-            }
-
-            .form-card {
-                padding-left: calc(1.75rem + 0.9rem);
-            }
-
-                .form-card::before {
-                    left: 1.9rem;
-                }
-        }
-
-        @@media (max-width: 420px) {
-            .form-card {
-                border-left: none;
-                border-right: none;
-                box-shadow: none;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="~/css/login.css" asp-append-version="true" />
 </head>
 <body>
     <main class="login-shell">
@@ -538,13 +32,20 @@
             </div>
 
             <div class="shelf" aria-hidden="true">
-                <span class="spine"></span>
-                <span class="spine"></span>
-                <span class="spine"></span>
-                <span class="spine"></span>
-                <span class="spine"></span>
-                <span class="spine"></span>
-                <span class="spine"></span>
+                <span class="spine">
+</span>
+                <span class="spine">
+</span>
+                <span class="spine">
+</span>
+                <span class="spine">
+</span>
+                <span class="spine">
+</span>
+                <span class="spine">
+</span>
+                <span class="spine">
+</span>
             </div>
 
             <blockquote>
@@ -566,10 +67,12 @@
                 </header>
 
                 <form method="post" asp-route-returnUrl="@Model.ReturnUrl">
-                    <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert"></div>
+                    <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert">
+</div>
 
                     <div class="field-group">
-                        <label asp-for="Input.Email"></label>
+                        <label asp-for="Input.Email">
+</label>
                         <div class="input-wrap">
                             <svg viewBox="0 0 24 24" aria-hidden="true">
                                 <path d="M3 6.5h18v11H3zM3 7l9 6 9-6" />
@@ -579,12 +82,14 @@
                                    autofocus
                                    placeholder="name@school.edu" />
                         </div>
-                        <span asp-validation-for="Input.Email" class="field-error"></span>
+                        <span asp-validation-for="Input.Email" class="field-error">
+</span>
                     </div>
 
                     <div class="field-group">
                         <div class="label-row">
-                            <label asp-for="Input.Password"></label>
+                            <label asp-for="Input.Password">
+</label>
                             <a asp-page="./ForgotPassword">Forgot password?</a>
                         </div>
                         <div class="input-wrap">
@@ -599,13 +104,9 @@
                                 Show
                             </button>
                         </div>
-                        <span asp-validation-for="Input.Password" class="field-error"></span>
+                        <span asp-validation-for="Input.Password" class="field-error">
+</span>
                     </div>
-
-                    <label class="remember-option">
-                        <input asp-for="Input.RememberMe" />
-                        <span>@Html.DisplayNameFor(model => model.Input.RememberMe)</span>
-                    </label>
 
                     <button class="submit-button" type="submit">Sign in</button>
                 </form>
@@ -617,17 +118,6 @@
         </section>
     </main>
 
-    <script>
-        const toggle = document.querySelector('.password-toggle');
-        const password = document.getElementById('Input_Password');
-
-        toggle?.addEventListener('click', () => {
-            const isVisible = password.type === 'text';
-            password.type = isVisible ? 'password' : 'text';
-            toggle.textContent = isVisible ? 'Show' : 'Hide';
-            toggle.setAttribute('aria-label', isVisible ? 'Show password' : 'Hide password');
-            toggle.setAttribute('aria-pressed', String(!isVisible));
-        });
-    </script>
+    <script src="~/js/login.js" asp-append-version="true"></script>
 </body>
 </html>

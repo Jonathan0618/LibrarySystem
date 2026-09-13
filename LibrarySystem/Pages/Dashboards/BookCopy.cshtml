@@ -1,0 +1,99 @@
+@page "/Dashboards/Copies/{id:long}"
+@model LibrarySystem.Pages.Dashboards.BookCopyModel
+@using LibrarySystem.Domain.Catalog
+@{ Layout=null; ViewData["ActiveNavigation"]="Catalog"; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Edit copy | School Library</title>
+<link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true"/>
+</head>
+<body>
+<partial name="_DashboardHeader"/>
+<main class="page">
+<div class="page-heading">
+<div>
+<h1>Edit physical copy</h1>
+<p class="subheading">Barcode @Model.Copy.Barcode · current status @Model.Copy.Status</p>
+</div>
+<a class="button secondary" asp-page="/Dashboards/BookDetails" asp-route-id="@Model.Copy.BookId">Back to title</a>
+</div>
+<section class="form-panel">
+<form method="post" class="book-form">
+<div asp-validation-summary="ModelOnly" class="validation-errors form-wide">
+</div>
+<input type="hidden" asp-for="Id"/>
+<input type="hidden" asp-for="Input.RowVersion"/>
+<div class="field">
+<label asp-for="Input.Barcode">
+</label>
+<input asp-for="Input.Barcode"/>
+<span asp-validation-for="Input.Barcode" class="validation-errors">
+</span>
+</div>
+<div class="field">
+<label asp-for="Input.ShelfLocationId">
+</label>
+<select asp-for="Input.ShelfLocationId">
+<option value="">Unassigned</option>@foreach(var shelf in Model.Shelves){
+<option value="@shelf.Id">@shelf.Name @(shelf.IsActive ? "" : "(inactive)")</option>
+}</select>
+</div>
+<div class="field">
+<label asp-for="Input.Condition">
+</label>
+<select asp-for="Input.Condition" asp-items="Html.GetEnumSelectList<BookCondition>()">
+</select>
+</div>
+<div class="field">
+<label asp-for="Input.AcquisitionDate">
+</label>
+<input asp-for="Input.AcquisitionDate" type="date"/>
+</div>
+<div class="field">
+<label asp-for="Input.AcquisitionPrice">
+</label>
+<input asp-for="Input.AcquisitionPrice"/>
+</div>
+<div class="form-actions">
+<button class="button" type="submit">Save copy</button>
+</div>
+</form>
+</section>
+<section class="data-panel">
+<div class="section-title">
+<h2>Circulation history</h2>
+</div>
+<table>
+<thead>
+<tr>
+<th>Loan</th>
+<th>Member</th>
+<th>Checked out</th>
+<th>Due</th>
+<th>Returned</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>@if(Model.Copy.History.Count==0){
+<tr>
+<td colspan="6" class="empty">This copy has no circulation history.</td>
+</tr>
+}else{@foreach(var loan in Model.Copy.History){
+<tr>
+<td>#@loan.LoanId</td>
+<td>@loan.MemberNumber</td>
+<td>@loan.CheckedOutAtUtc.ToLocalTime().ToString("g")</td>
+<td>@loan.DueAtUtc.ToLocalTime().ToString("g")</td>
+<td>@(loan.ReturnedAtUtc?.ToLocalTime().ToString("g") ?? "—")</td>
+<td>@loan.Status</td>
+</tr>
+}}</tbody>
+</table>
+</section>
+</main>
+<partial name="_ValidationScriptsPartial"/>
+</body>
+</html>

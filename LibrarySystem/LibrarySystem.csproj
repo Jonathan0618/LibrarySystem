@@ -12,6 +12,7 @@
   <ItemGroup>
     <ProjectReference Include="..\LibrarySystem.Application\LibrarySystem.Application.csproj" />
     <ProjectReference Include="..\LibrarySystem.Infrastructure\LibrarySystem.Infrastructure.csproj" />
+    <ProjectReference Include="..\LibrarySystem.Services\LibrarySystem.Services.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -20,10 +21,11 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.10" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Pages\Dashboard\" />
+    <Folder Include="Areas\Identity\Pages\Shared\" />
   </ItemGroup>
 
 </Project>

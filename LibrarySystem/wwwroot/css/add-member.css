@@ -1,0 +1,7 @@
+.member-form-panel { max-width: 820px; padding: clamp(1.25rem, 3vw, 2rem); }
+        .member-form .validation-errors { grid-column: 1 / -1; }
+        .member-form .field-validation-error { color: #812f25; font-size: .78rem; }
+        .member-form .input-validation-error { border-color: #9c3b2e; }
+        .member-form .form-actions { align-items: center; gap: .75rem; }
+        .member-form .form-actions .button { min-width: 9rem; }
+        @media (max-width: 800px) { .member-form .validation-errors { grid-column: auto; } }

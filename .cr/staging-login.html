@@ -1,0 +1,109 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light" />
+    <title>Sign in | School Library</title>
+    <link rel="stylesheet" href="/css/login.9gm3u00jvh.css" />
+</head>
+<body>
+    <main class="login-shell">
+        <section class="library-panel" aria-labelledby="welcome-title">
+            <div class="seal" aria-hidden="true">
+                <svg viewBox="0 0 48 48" role="img">
+                    <path d="M8 9.5A4.5 4.5 0 0 1 12.5 5H22a6 6 0 0 1 6 6v29a6 6 0 0 0-6-6h-9.5A4.5 4.5 0 0 0 8 38.5v-29Z" />
+                    <path d="M40 9.5A4.5 4.5 0 0 0 35.5 5H28v35a6 6 0 0 1 6-6h1.5a4.5 4.5 0 0 1 4.5 4.5v-29Z" />
+                </svg>
+            </div>
+
+            <div class="panel-copy">
+                <h1 id="welcome-title">A quiet place for curious minds.</h1>
+                <p class="welcome-copy">
+                    Find your next book, keep track of borrowed titles, and stay connected to your library.
+                </p>
+            </div>
+
+            <div class="shelf" aria-hidden="true">
+                <span class="spine">
+</span>
+                <span class="spine">
+</span>
+                <span class="spine">
+</span>
+                <span class="spine">
+</span>
+                <span class="spine">
+</span>
+                <span class="spine">
+</span>
+                <span class="spine">
+</span>
+            </div>
+
+            <blockquote>
+                “The beautiful thing about learning is that no one can take it away from you.”
+                <cite>— B.B. King</cite>
+            </blockquote>
+        </section>
+
+        <section class="form-panel" aria-labelledby="login-title">
+            <div class="form-card">
+                <div class="mobile-brand">
+                    <span class="mobile-brand-icon" aria-hidden="true">L</span>
+                    <span>School Library</span>
+                </div>
+
+                <header>
+                    <h2 id="login-title">Sign in to your account</h2>
+                    <p>Use the school email assigned to your library account.</p>
+                </header>
+
+                <form method="post" action="/Identity/Account/Login?returnUrl=%2F">
+                    
+
+                    <div class="field-group">
+                        <label for="Input_Email">School email</label>
+                        <div class="input-wrap">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M3 6.5h18v11H3zM3 7l9 6 9-6" />
+                            </svg>
+                            <input autocomplete="username" autofocus placeholder="name@school.edu" type="email" data-val="true" data-val-email="The School email field is not a valid e-mail address." data-val-maxlength="The field School email must be a string or array type with a maximum length of &#x27;256&#x27;." data-val-maxlength-max="256" data-val-required="The School email field is required." id="Input_Email" maxlength="256" name="Input.Email" value="" />
+                        </div>
+                        <span class="field-error field-validation-valid" data-valmsg-for="Input.Email" data-valmsg-replace="true">
+</span>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="label-row">
+                            <label for="Input_Password">Password</label>
+                            <a href="/Identity/Account/ForgotPassword">Forgot password?</a>
+                        </div>
+                        <div class="input-wrap">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <rect x="5" y="10" width="14" height="10" rx="2" />
+                                <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                            </svg>
+                            <input autocomplete="current-password" placeholder="Enter your password" type="password" data-val="true" data-val-required="The Password field is required." id="Input_Password" name="Input.Password" />
+                            <button class="password-toggle" type="button" aria-label="Show password" aria-pressed="false">
+                                Show
+                            </button>
+                        </div>
+                        <span class="field-error field-validation-valid" data-valmsg-for="Input.Password" data-valmsg-replace="true">
+</span>
+                    </div>
+
+                    <button class="submit-button" type="submit">Sign in</button>
+                <input name="__RequestVerificationToken" type="hidden" value="CfDJ8KSH5ySIt_lOuBqNdvwnF8vcsqyC3ENS5R1AwiZ2Z6rxDmiAK51NLsqIM6WrkQ5NeaWlGRpXDr-pk9pZ5PfAmbpRGRjo4lCM4q92WmU90SLuz56qavFpFNpKBmyZDvflZTxs2M1-iKD6zVGbrGBsK6I" /></form>
+
+                <p class="help-copy">
+                    Need an account or cannot sign in? Contact your school librarian.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <script src="/js/login.ruoakrx9ky.js"></script>
+</body>
+</html>

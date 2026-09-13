@@ -1,0 +1,172 @@
+@page
+@model LibrarySystem.Pages.Dashboards.CirculationSettingsModel
+@{ Layout=null; ViewData["ActiveNavigation"]="Checkouts"; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Circulation policies | School Library</title>
+<link rel="stylesheet" href="~/css/management-pages.css" asp-append-version="true"/>
+</head>
+<body>
+<partial name="_DashboardHeader"/>
+<main class="page">
+<div class="page-heading">
+<div>
+<h1>Circulation policies and closures</h1>
+<p class="subheading">Due dates use each member type's policy. When closure skipping is enabled, weekends and listed school closures do not count as loan days.</p>
+</div>
+<a class="button secondary" asp-page="./Checkouts">Back to checkouts</a>
+</div>
+@if(TempData["StatusMessage"] is string status){
+<div class="notice" role="status">@status</div>
+}
+@if(TempData["ErrorMessage"] is string error){
+<div class="notice error" role="alert">@error</div>
+}
+<section class="data-panel">
+<div class="section-title">
+<h2>Loan policies</h2>
+</div>
+<table>
+<thead>
+<tr>
+<th>Member type</th>
+<th>Loan period</th>
+<th>Loan limit</th>
+<th>Renewals</th>
+<th>Overdue renewal</th>
+<th>Calendar behavior</th>
+<th>
+</th>
+</tr>
+</thead>
+<tbody>@foreach(var policy in Model.Policies){var formId=$"policy-{policy.Id}";<tr>
+<td class="primary">@policy.MemberType</td>
+<td>
+<input form="@formId" class="compact-input" name="loanPeriodDays" type="number" min="1" max="365" value="@policy.LoanPeriodDays"/> days</td>
+<td>
+<input form="@formId" class="compact-input" name="maximumActiveLoans" type="number" min="1" max="100" value="@policy.MaximumActiveLoans"/>
+</td>
+<td>
+<input form="@formId" class="compact-input" name="maximumRenewals" type="number" min="0" max="20" value="@policy.MaximumRenewals"/>
+</td>
+<td>
+<label>
+<input form="@formId" name="allowRenewalWhenOverdue" type="checkbox" value="true" checked="@policy.AllowRenewalWhenOverdue"/> Allow</label>
+</td>
+<td>
+<label>
+<input form="@formId" name="skipWeekendsAndSchoolHolidays" type="checkbox" value="true" checked="@policy.SkipWeekendsAndSchoolHolidays"/> Skip weekends and closures</label>
+</td>
+<td>
+<form id="@formId" method="post" asp-page-handler="Policy">
+<input type="hidden" name="id" value="@policy.Id"/>
+<input type="hidden" name="memberType" value="@policy.MemberType"/>
+<input type="hidden" name="rowVersion" value="@Convert.ToBase64String(policy.RowVersion)"/>
+<button class="small-button" type="submit">Save</button>
+</form>
+</td>
+</tr>
+}</tbody>
+</table>
+</section>
+<section class="data-panel">
+<div class="section-title">
+<h2>Fine and checkout-blocking rules</h2>
+</div>
+<table>
+<thead>
+<tr>
+<th>Member type</th>
+<th>Grace days</th>
+<th>Daily overdue</th>
+<th>Maximum overdue</th>
+<th>Lost item</th>
+<th>Damaged item</th>
+<th>Checkout block above</th>
+</tr>
+</thead>
+<tbody>@foreach(var policy in Model.Policies){var formId=$"policy-{policy.Id}";<tr>
+<td class="primary">@policy.MemberType</td>
+<td>
+<input form="@formId" class="compact-input" name="fineGracePeriodDays" type="number" min="0" max="30" value="@policy.FineGracePeriodDays"/>
+</td>
+<td>
+<input form="@formId" class="compact-input" name="dailyOverdueFine" type="number" min="0" max="1000" step="0.01" value="@policy.DailyOverdueFine"/>
+</td>
+<td>
+<input form="@formId" class="compact-input" name="maximumOverdueFine" type="number" min="0" max="100000" step="0.01" value="@policy.MaximumOverdueFine"/>
+</td>
+<td>
+<input form="@formId" class="compact-input" name="lostItemFine" type="number" min="0" max="100000" step="0.01" value="@policy.LostItemFine"/>
+</td>
+<td>
+<input form="@formId" class="compact-input" name="damagedItemFine" type="number" min="0" max="100000" step="0.01" value="@policy.DamagedItemFine"/>
+</td>
+<td>
+<input form="@formId" class="compact-input" name="maximumOutstandingBalanceForCheckout" type="number" min="0" max="100000" step="0.01" value="@policy.MaximumOutstandingBalanceForCheckout"/>
+</td>
+</tr>
+}</tbody>
+</table>
+<p class="section-note">Set all monetary values to zero to use non-monetary obligations. Save changes with the corresponding member type's Save button in the loan-policy table.</p>
+</section>
+<div class="report-grid">
+<section class="form-panel">
+<h2>Add or update closure</h2>
+<form method="post" asp-page-handler="Holiday" class="stack-form">
+<label asp-for="Holiday.Date">
+</label>
+<input asp-for="Holiday.Date" type="date"/>
+<span asp-validation-for="Holiday.Date" class="validation-errors">
+</span>
+<label asp-for="Holiday.Name">
+</label>
+<input asp-for="Holiday.Name"/>
+<span asp-validation-for="Holiday.Name" class="validation-errors">
+</span>
+<button class="button" type="submit">Save closure</button>
+</form>
+</section>
+<section class="form-panel">
+<div class="section-heading">
+<h2>@Model.Year closures</h2>
+<form method="get" class="inline-field">
+<input asp-for="Year" type="number" min="2000" max="2200"/>
+<button class="small-button" type="submit">View</button>
+</form>
+</div>
+@if(Model.Holidays.Count==0){
+<div class="empty">No closure dates for this year.</div>
+}else{<table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Name</th>
+<th>
+</th>
+</tr>
+</thead>
+<tbody>@foreach(var holiday in Model.Holidays){
+<tr>
+<td>@holiday.Date.ToString("D")</td>
+<td>@holiday.Name</td>
+<td>
+<form method="post" asp-page-handler="DeleteHoliday" data-confirm="Remove this closure date?">
+<input type="hidden" name="id" value="@holiday.Id"/>
+<input type="hidden" name="Year" value="@Model.Year"/>
+<button class="small-button danger" type="submit">Remove</button>
+</form>
+</td>
+</tr>
+}</tbody>
+</table>
+}</section>
+</div>
+</main>
+<partial name="_ValidationScriptsPartial"/>
+<script src="~/js/security-ui.js" asp-append-version="true"></script>
+</body>
+</html>

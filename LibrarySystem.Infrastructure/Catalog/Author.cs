@@ -15,5 +15,7 @@ public sealed class Author
     [MaxLength(200)]
     public required string Name { get; set; }
 
+    public bool IsActive { get; set; } = true;
+
     public ICollection<BookAuthor> BookAuthors { get; set; } = [];
 }

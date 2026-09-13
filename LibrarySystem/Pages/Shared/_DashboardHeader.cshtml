@@ -1,0 +1,40 @@
+@{
+    var activeNavigation = ViewData["ActiveNavigation"] as string;
+}
+<header class="app-header">
+    <a class="brand" asp-page="/Dashboards/LibrarianDashboard">
+        <span class="seal" aria-hidden="true">
+            <svg viewBox="0 0 48 48" role="img">
+                <path d="M8 9.5A4.5 4.5 0 0 1 12.5 5H22a6 6 0 0 1 6 6v29a6 6 0 0 0-6-6h-9.5A4.5 4.5 0 0 0 8 38.5v-29Z" />
+                <path d="M40 9.5A4.5 4.5 0 0 0 35.5 5H28v35a6 6 0 0 1 6-6h1.5a4.5 4.5 0 0 1 4.5 4.5v-29Z" />
+            </svg>
+        </span>
+        <span>School Library</span>
+    </a>
+    <nav class="app-nav" aria-label="Main navigation">
+        <a asp-page="/Dashboards/LibrarianDashboard" class="@(activeNavigation == "Dashboard" ? "active" : null)">Dashboard</a>
+        <a asp-page="/Dashboards/Catalog" class="@(activeNavigation == "Catalog" ? "active" : null)">Catalog</a>
+        <a asp-page="/Dashboards/Members" class="@(activeNavigation == "Members" ? "active" : null)">Members</a>
+        <a href="/Dashboards/Checkouts" class="@(activeNavigation == "Checkouts" ? "active" : null)">Checkouts</a>
+        <a asp-page="/Dashboards/Reservations" class="@(activeNavigation == "Reservations" ? "active" : null)">Reservations</a>
+        <a asp-page="/Dashboards/Fines" class="@(activeNavigation == "Fines" ? "active" : null)">Fines</a>
+        <a asp-page="/Dashboards/Inventory" class="@(activeNavigation == "Inventory" ? "active" : null)">Inventory</a>
+        <a asp-page="/Dashboards/Acquisitions" class="@(activeNavigation == "Acquisitions" ? "active" : null)">Acquisitions</a>
+        <a asp-page="/Dashboards/Notifications" class="@(activeNavigation == "Notifications" ? "active" : null)">Notifications</a>
+        <a href="/Dashboards/Reports" class="@(activeNavigation == "Reports" ? "active" : null)">Reports</a>
+        @if (User.IsInRole(LibrarySystem.Application.Security.RoleNames.Administrator)){
+<a asp-page="/Dashboards/AuditLog" class="@(activeNavigation == "Audit" ? "active" : null)">Audit</a>
+}
+    </nav>
+    <div class="user-chip">
+        <span class="avatar" aria-hidden="true">L</span>
+        <span>
+            <span class="name">@User.Identity?.Name</span>
+            <span class="role">Librarian</span>
+        </span>
+        <a class="sign-out" asp-area="Identity" asp-page="/Account/ChangePassword">Change password</a>
+        <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/Identity/Account/Login" method="post">
+            <button class="sign-out" type="submit">Sign out</button>
+        </form>
+    </div>
+</header>
